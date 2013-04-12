@@ -132,9 +132,11 @@ public class ViewConst {
 	
 	public static final String[] outputStatsTableTitles = {"Loan Selection", "# of Deals", 
 		"Method", "Estimate", "Upper Bound", "Lower Bound", "Std/R2"};
-	public static final String[] estimationMethods = {"Average", "Case-Shiller Regression", 
-		"Zillow Regression", "Case-Shiller Extrapolation", "Zillow Extrapolation"};
-		
+//	public static final String[] estimationMethods = {"Average", "Case-Shiller Regression", 
+//		"Zillow Regression", "Case-Shiller Extrapolation", "Zillow Extrapolation"};
+//	
+	public static final String[] estimationMethods = {"Regression"};
+	
 	//Portfolio NPV page
 	public static final String[] npvGroupControlNames = {"Parameters", "Statistical Market Analysis", "NPV Calculation"};
 	public static final int[] npvGroupControlHeights = {180,90,200};
@@ -219,9 +221,9 @@ public class ViewConst {
 	
 	public static final int statsNpvTableWidth = 420;
 	public static final int statsNpvTableHeight = 490;
-	public static final String[] statsNpvTableNames = {"Timeline", "Rental length (months)", "Our projected price", 
-													 "Best Estimate", "Upper Bound of Estimate", "Lower Bound of Estimate"};
-	public static final int[] statsNpvTableColumnWidth = {60, 100, 100, 100, 80, 120};
+	public static final String[] statsNpvTableNames = {"Timeline", "Best Estimate", "Our projected price", 
+													 "Zillow price" }; //, "Upper Bound of Estimate", "Lower Bound of Estimate"};
+	public static final int[] statsNpvTableColumnWidth = {60, 100, 100, 100}; //, 80, 120};
 	
 	
 }

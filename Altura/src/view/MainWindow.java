@@ -26,6 +26,7 @@ public class MainWindow {
 	public Table outputStatsTable;
 	private Table portfolioTable;
 	private Table senNpvTable;
+	private Table statsNpvTable;
 	private Composite outputImageComposite;
 	private Composite senImageComposite;
 	private Composite statsImageComposite0;
@@ -88,6 +89,9 @@ public class MainWindow {
 		tabFolder.setBounds(0, 0, tabFolderWidth, tabFolderHeight);
 		
 		for (int i=0;i<tabFolderNames.length;i++) {
+			if (tabFolderNames[i].equals("Sensitivity")) {
+				continue;
+			}
 			TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
 			tbtmNewItem.setText(tabFolderNames[i]);
 			createTabItem(tabFolder, tbtmNewItem, i);
@@ -140,8 +144,8 @@ public class MainWindow {
 				lblNewLabel.setBounds(0, 0, userguideGroupControlWidth, userguideGroupControlHeights[i]);
 				lblNewLabel.setText(userguideSessions[i]);
 			}
+			break;
 		}
-		break;
 		case 1: { //creating the output(1) page
 			ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(scrolledComposite);
@@ -162,8 +166,8 @@ public class MainWindow {
 			
 			scrolledComposite.setContent(composite);
 			scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			break;
 		}
-		break;
 		case 2: { //creating the output(2) page
 			Composite composite = new Composite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(composite);
@@ -173,8 +177,8 @@ public class MainWindow {
 			group.setBounds(outputGroupControlX, outputGroupControlYs[0], 
 					outputGroupControlWidth, height);
 			createOutputGroup(group, 2);
+			break;
 		}
-		break;
 		case 3: { //creating the portfolio npv page
 			Composite composite = new Composite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(composite);
@@ -188,24 +192,23 @@ public class MainWindow {
 						  		npvGroupControlHeights[i]);
 				createNpvGroup(group, i);
 			}
-
+			break;
 		}
-		break;
-		case 4: { //creating the sensitivity page
-			Composite composite = new Composite(tabFolder, SWT.NONE);
-			tbtmItem.setControl(composite);
-			
-			for (int i=0;i<senGroupControlNames.length;i++) {
-				Group group = new Group(composite, SWT.NONE);
-				group.setText(senGroupControlNames[i]);
-				group.setBounds(senGroupControlX, 
-						  		senGroupControlYs[i], 
-						  		senGroupControlWidth,
-						  		senGroupControlHeights[i]);
-				createSenGroup(group, i);
-			}
-		}
-		break;
+//		case 4: { //creating the sensitivity page
+//			Composite composite = new Composite(tabFolder, SWT.NONE);
+//			tbtmItem.setControl(composite);
+//			
+//			for (int i=0;i<senGroupControlNames.length;i++) {
+//				Group group = new Group(composite, SWT.NONE);
+//				group.setText(senGroupControlNames[i]);
+//				group.setBounds(senGroupControlX, 
+//						  		senGroupControlYs[i], 
+//						  		senGroupControlWidth,
+//						  		senGroupControlHeights[i]);
+//				createSenGroup(group, i);
+//			}
+//		}
+//		break;
 		case 5: { //creating the statistical model page
 			Composite composite = new Composite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(composite);
@@ -219,15 +222,14 @@ public class MainWindow {
 						  		statsGroupControlHeights[i]);
 				createStatsGroup(group, i);
 			}
+			break;
+		}
+		default: {
+			break;
 		}
 		}
 	}
 
-	private void setOutputImageComposite(Image image) {
-		
-		
-	}
-	
 	private void createStatsGroup(Group group, int index) {
 		ContentController cc = new ContentController();
 		switch (index) {
@@ -242,7 +244,7 @@ public class MainWindow {
 				label.setText(statsParamsNames[i]);
 				
 				if (i==0) {
-					Combo combo = new Combo(group, SWT.BORDER);
+					final Combo combo = new Combo(group, SWT.BORDER);
 					combo.setBounds(10+statsParamLabelWidth+10, 
 									i*(statsParamHeight+5), 
 									statsParamTextWidth+comboWidthOffset, 
@@ -253,6 +255,15 @@ public class MainWindow {
 					String[] comboList = new String[contents.size()];
 					contents.toArray(comboList);
 					combo.setItems(comboList);
+					combo.select(currentSelectedLoanIndex);
+					combo.addModifyListener(new ModifyListener() {
+						
+						@Override
+						public void modifyText(ModifyEvent arg0) {
+							// TODO Auto-generated method stub
+							currentSelectedLoanIndex = combo.getSelectionIndex();
+						}
+					});
 				}
 				else {
 					Text text = new Text(group, SWT.NONE);
@@ -272,6 +283,30 @@ public class MainWindow {
 			Button buttonUpdate = new Button(group, SWT.BORDER);
 			buttonUpdate.setText(updateString);
 			buttonUpdate.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
+			buttonUpdate.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseDown(MouseEvent e) {
+//					System.out.println(paramList);
+//
+//					TableItem[] tItems =  statsNpvTable.getItems();
+//					
+//					ArrayList<String[]> updatedContent = new ArrayList<String[]>();
+//					ContentController cc = new ContentController();
+//					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
+//					for (int j=0;j<updatedContent.size();j++) {
+//						System.out.println(updatedContent.get(j));
+//						tItems[j].setText(updatedContent.get(j));
+//					}
+//					
+//					ArrayList<ArrayList<Double>> prices = new ArrayList<ArrayList<Double>>();
+//					ArrayList<Double> bestEstimate = new ArrayList<Double>();
+//					ArrayList<Double> ourPrice = new ArrayList<Double>();
+//					ArrayList<Double> zillowPrice = new ArrayList<Double>();
+//					
+//					//for (int j=0;j<upd)
+					
+				}
+			});
 			break;
 		}
 		case 1: {
@@ -286,19 +321,19 @@ public class MainWindow {
 								    statsNpvGroupControlWidths[i], 
 								    statsNpvGroupControlHeights[i]);
 				if (i==0) {  //create table
-					Table npvTable = new Table(composite, SWT.BORDER|SWT.FULL_SELECTION);
-					npvTable.setHeaderVisible(true);
-					npvTable.setLinesVisible(true);
-					npvTable.setBounds(0, 0, statsNpvTableWidth, statsNpvTableHeight);
+					statsNpvTable = new Table(composite, SWT.BORDER|SWT.FULL_SELECTION);
+					statsNpvTable.setHeaderVisible(true);
+					statsNpvTable.setLinesVisible(true);
+					statsNpvTable.setBounds(0, 0, statsNpvTableWidth, statsNpvTableHeight);
 
 					for (int j=0;j<statsNpvTableNames.length;j++) {
-						TableColumn tableColumn = new TableColumn(npvTable, SWT.NONE);
+						TableColumn tableColumn = new TableColumn(statsNpvTable, SWT.NONE);
 						tableColumn.setText(statsNpvTableNames[j]);
 						tableColumn.setWidth(statsNpvTableColumnWidth[j]);
 					}
 					
 					for (int j=0;j<defaultContents.size();j++) {
-						TableItem tItem = new TableItem(npvTable, SWT.NONE);
+						TableItem tItem = new TableItem(statsNpvTable, SWT.NONE);
 						tItem.setText(defaultContents.get(j));
 					}
 				}
@@ -437,7 +472,7 @@ public class MainWindow {
 					
 					ArrayList<String[]> updatedContent = new ArrayList<String[]>();
 					ContentController cc = new ContentController();
-					updatedContent = cc.getUpdateSenNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
+					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
 					for (int j=0;j<updatedContent.size();j++) {
 						System.out.println(updatedContent.get(j));
 						tItems[j].setText(updatedContent.get(j));
@@ -545,46 +580,46 @@ public class MainWindow {
 						HashMap<String, Double> values = new HashMap<String, Double>();
 						HashMap<String, Double> projectedPrices = new HashMap<String, Double>();
 						
-						for (int i=0;i<n;i++) {
-							//get account num
-							String accountNum = tItems[i].getText(0);
-							//parse rental
-							Double rental = Double.valueOf(arcPortfolio.getEntry(i).get("Zestimate Rental"));
-							//parse value
-							Double value = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
-							//parse projected price
-							//TODO change the projected price
-							Double projectedPrice = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
-							//parse date
-							String dateStr = tItems[i].getText(6);
-							SimpleDateFormat dFormat = new SimpleDateFormat("M-d-yyyy");
-							Date pDate;
-							
-							pDate = dFormat.parse(dateStr);
-							Calendar pTimeline = Calendar.getInstance();
-							pTimeline.setTime(pDate);
-							//add hashmap
-							rentalZEstimates.put(accountNum, rental);
-							projectedTimelines.put(accountNum, pTimeline);
-							values.put(accountNum, value);
-							projectedPrices.put(accountNum, projectedPrice);
-						
-						}
+//						for (int i=0;i<n;i++) {
+//							//get account num
+//							String accountNum = tItems[i].getText(0);
+//							//parse rental
+//							Double rental = Double.valueOf(arcPortfolio.getEntry(i).get("Zestimate Rental"));
+//							//parse value
+////							Double value = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
+//							//parse projected price
+//							//TODO change the projected price
+//							Double projectedPrice = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
+//							//parse date
+//							String dateStr = tItems[i].getText(6);
+//							SimpleDateFormat dFormat = new SimpleDateFormat("M-d-yyyy");
+//							Date pDate;
+//							
+//							pDate = dFormat.parse(dateStr);
+//							Calendar pTimeline = Calendar.getInstance();
+//							pTimeline.setTime(pDate);
+//							//add hashmap
+//							rentalZEstimates.put(accountNum, rental);
+//							projectedTimelines.put(accountNum, pTimeline);
+//							values.put(accountNum, value);
+//							projectedPrices.put(accountNum, projectedPrice);
+//						
+//						}
 						//get parameters
 					
-						Double monthIRR = Double.valueOf(paramList.getParam(npvParamsNames[2]));
+//						Double monthIRR = Double.valueOf(paramList.getParam(npvParamsNames[2]));
 						String todayDateStr = paramList.getParam(npvParamsNames[0]);
-						Double maintenanceCost = Double.valueOf(paramList.getParam(npvParamsNames[4]));
-						Double transactionCost = Double.valueOf(paramList.getParam(npvParamsNames[5]));
+//						Double maintenanceCost = Double.valueOf(paramList.getParam(npvParamsNames[4]));
+//						Double transactionCost = Double.valueOf(paramList.getParam(npvParamsNames[5]));
 						Calendar todayDate = Calendar.getInstance();
 						todayDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(todayDateStr));
 						
-						System.out.println(paramList);
-						arcPortfolio.updatePortfolioRentalOverPeriod(rentalZEstimates, monthIRR, projectedTimelines, todayDate);
-						arcPortfolio.updatePortfolioMaintenanceCostOverPeriod(values, maintenanceCost, monthIRR, projectedTimelines, todayDate);
-						arcPortfolio.updatePortfolioRentAndSell(values, maintenanceCost, monthIRR, transactionCost, projectedTimelines, projectedPrices, todayDate);
-						arcPortfolio.updatePortfolioSellNow(values, projectedPrices, transactionCost);
-						arcPortfolio.updatePortfolioHoldAndSell(values, projectedPrices, monthIRR, projectedTimelines, transactionCost, todayDate);
+						//System.out.println(paramList);
+//						arcPortfolio.updatePortfolioRentalOverPeriod(rentalZEstimates, monthIRR, projectedTimelines, todayDate);
+//						arcPortfolio.updatePortfolioMaintenanceCostOverPeriod(values, maintenanceCost, monthIRR, projectedTimelines, todayDate);
+//						arcPortfolio.updatePortfolioRentAndSell(values, maintenanceCost, monthIRR, transactionCost, projectedTimelines, projectedPrices, todayDate);
+//						arcPortfolio.updatePortfolioSellNow(values, projectedPrices, transactionCost);
+//						arcPortfolio.updatePortfolioHoldAndSell(values, projectedPrices, monthIRR, projectedTimelines, transactionCost, todayDate);
 						
 						ContentController cc = new ContentController();
 						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};

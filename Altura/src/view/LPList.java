@@ -82,8 +82,6 @@ public class LPList {
 		scatterChart.setPointsX(pointsX);
 		scatterChart.setPointsY(pointsY);
 		scatterChart.setPointsSize(pointsSize);
-		System.out.println(pointsX);
-		System.out.println(pointsY);
 		scatterChart.setLegend("List Price");
 		scatterChart.setChartWidth(500);
 		scatterChart.setChartHeight(300);

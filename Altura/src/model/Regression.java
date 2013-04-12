@@ -141,9 +141,9 @@ public class Regression{
 		ArrayList<String> rCommands = new ArrayList<String>();
 		rCommands.add("sink(\"" + dirName + rOutput + "\")");
 		rCommands.add("x<-read.csv(\"" + dirName + sfrPropertyListFileName + "\", header=TRUE)");
-		rCommands.add("llm<-lm(x$SP.sqft~., data=x)");
+		rCommands.add("llm<-lm(x$TotalPrice~., data=x)");
 		for (int i=0;i<currentIndex.size();i++) {
-			String t = "ans<-" + String.valueOf(lotSize) + "*" +
+			String t = "ans<-" + //String.valueOf(lotSize) + "*" +
 					"exp(llm$coefficients[\"(Intercept)\"]+" +
 					"llm$coefficients[\"X.BD\"]*log(" + String.valueOf(numBedrms) + ")" +
 							"+llm$coefficients[\"X.Bth\"]*log(" + String.valueOf(numBathrms) + ") " +

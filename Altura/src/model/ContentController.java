@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+
 import data.*;
 
 public class ContentController {
@@ -33,7 +34,7 @@ public class ContentController {
 	public static final int PROPERTY_TYPE_SFR           = 0;
 	public static final int PROPERTY_TYPE_CONDO         = 1;
 	
-	public ArrayList<String[]> getUpdateSenNpvTableContent(Portfolio portfolio, int propertyIndex, ParamList paramList) {
+	public ArrayList<String[]> getUpdateStatsNpvTableContent(Portfolio portfolio, int propertyIndex, ParamList paramList) {
 		ArrayList<String[]> contents = new ArrayList<String[]>();
 		SensitivityAnalyzer sa = new SensitivityAnalyzer();
 		ArrayList<Calendar> futureDates = new ArrayList<Calendar>();
@@ -43,14 +44,26 @@ public class ContentController {
 			futureDates.add(date);
 		}
 		sa.calculatePrices(portfolio, propertyIndex, paramList, futureDates);
+		Double zEstimatePriceToday = Double.valueOf(portfolio.getValue(propertyIndex, "Zestimate Px"));
+		Double inflationRate = Double.valueOf(paramList.getParam("Inflation Rate (%)"));
 		for (int rowInd = 0;rowInd<timelineLength;rowInd++) {
 			ArrayList<String> row = new ArrayList<String>();
 			
-			row.add(0, Formater.toDateString(futureDates.get(rowInd).get(Calendar.YEAR), futureDates.get(rowInd).get(Calendar.MONTH)+1));
-			row.add(1, String.valueOf(rowInd));
-			row.add(2, Formater.toCurrency(sa.getPriceByAccountByDate(portfolio.getValue(propertyIndex, "Account"), 
-																						 futureDates.get(rowInd))));
+			Double zEstimatePrice = zEstimatePriceToday * Math.pow((1+Formater.annualToMonth(inflationRate.doubleValue())/100.0), rowInd);
+			Double ourProjPrice = sa.getPriceByAccountByDate(portfolio.getValue(propertyIndex, "Account"), futureDates.get(rowInd));
+			Double bestEstimate;
 			
+			row.add(0, Formater.toDateString(futureDates.get(rowInd).get(Calendar.YEAR), futureDates.get(rowInd).get(Calendar.MONTH)+1));
+			//row.add(1, String.valueOf(rowInd));
+			
+			if (ourProjPrice < zEstimatePrice*1.1 && ourProjPrice > zEstimatePrice *0.9) {
+				bestEstimate = ourProjPrice;
+			} else {
+				bestEstimate = zEstimatePrice;
+			}
+			row.add(1, Formater.toCurrency(bestEstimate.doubleValue()));
+			row.add(2, Formater.toCurrency(ourProjPrice.doubleValue()));
+			row.add(3, Formater.toCurrency(zEstimatePrice.doubleValue()));
 			String[] newRow = new String[row.size()];
 			System.out.println(row);
 			row.toArray(newRow);
@@ -80,12 +93,12 @@ public class ContentController {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
 						case 2: {row.add(j, portfolioRow.get("Street"));break;}
-						case 3: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Appraiser FMV"))));break;}
-						case 4: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Value"))));break;}
-						case 5: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Projected Recovery"))));break;}
-						case 6: {row.add(j, portfolioRow.get("Projected Timeline"));break;}
+//						case 3: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Appraiser FMV"))));break;}
+//						case 4: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Value"))));break;}
+//						case 5: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Projected Recovery"))));break;}
+//						case 6: {row.add(j, portfolioRow.get("Projected Timeline"));break;}
 						case 7: {row.add(j, portfolioRow.get("Size/SqFeet"));break;}
-						case 8: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Zestimate Rental"))));break;}
+//						case 8: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Zestimate Rental"))));break;}
 						case 9: { //Today's Est. Price
 							Calendar now = Calendar.getInstance();
 							
@@ -132,15 +145,15 @@ public class ContentController {
 							}
 							break;
 							}
-						case 11: {row.add(j, Formater.toPercentage(projPrice/todayPrice));break;}
-						case 12: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rental Over Period"))));break;}
-						case 13: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Maintenance Over Period"))));break;}
-						case 14: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_ARC"))));break;}
-						case 15: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_Altura"))));break;}
-						case 16: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_ARC"))));break;}
-						case 17: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_Altura"))));break;}
-						case 18: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_ARC"))));break;}
-						case 19: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_Altura"))));break;}
+//						case 11: {row.add(j, Formater.toPercentage(projPrice/todayPrice));break;}
+//						case 12: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rental Over Period"))));break;}
+//						case 13: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Maintenance Over Period"))));break;}
+//						case 14: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_ARC"))));break;}
+//						case 15: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_Altura"))));break;}
+//						case 16: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_ARC"))));break;}
+//						case 17: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_Altura"))));break;}
+//						case 18: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_ARC"))));break;}
+//						case 19: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_Altura"))));break;}
 						default: {row.add(j, null);break;}
 						}
 					}
@@ -181,7 +194,6 @@ public class ContentController {
 					String timelineStr = Formater.toDateString(now.get(Calendar.YEAR), now.get(Calendar.MONTH)+1);
 					ArrayList<String> row = new ArrayList<String>();
 					row.add(0, timelineStr);
-					row.add(1, String.valueOf(rowInd));
 					
 					String[] newRow = new String[row.size()];
 					row.toArray(newRow);
@@ -229,12 +241,12 @@ public class ContentController {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
 						case 2: {row.add(j, portfolioRow.get("Street"));break;}
-						case 3: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Appraiser FMV"))));break;}
-						case 4: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Value"))));break;}
-						case 5: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Projected Recovery"))));break;}
-						case 6: {row.add(j, portfolioRow.get("Projected Timeline"));break;}
+						//case 3: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Appraiser FMV"))));break;}
+//						case 4: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Value"))));break;}
+//						case 5: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Projected Recovery"))));break;}
+//						case 6: {row.add(j, portfolioRow.get("Projected Timeline"));break;}
 						case 7: {row.add(j, portfolioRow.get("Size/SqFeet"));break;}
-						case 8: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Zestimate Rental"))));break;}
+//						case 8: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Zestimate Rental"))));break;}
 						//case 9: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Today's Est. Price"))));break;}
 						default: {row.add(j, null);break;}
 						}
@@ -299,12 +311,12 @@ public class ContentController {
 				//IRR
 				contents.add("10");
 				//Monthly IRR
-				double mIRR = 10.0/12.0;
+				double mIRR = Formater.annualToMonth(10.0);
 				contents.add(Formater.toShortDouble(mIRR,2));
 				//Maintenance Cost annual
 				contents.add("8");
 				//Maintenance Costs
-				double mMC = 8.0/12.0;
+				double mMC = Formater.annualToMonth(8.0);
 				contents.add(Formater.toShortDouble(mMC,2));
 				//Transaction Costs
 				contents.add("7");
@@ -322,7 +334,7 @@ public class ContentController {
 			case DISPLAY_STATS_PARAMS: {
 				contents.add(null);
 				//Estimation Method
-				contents.add("N/A");
+				contents.add(ViewConst.estimationMethods[0]);
 			}
 			}
 			break;

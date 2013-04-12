@@ -57,4 +57,12 @@ public class Formater {
 		StringBuffer sb = new StringBuffer();
 		return sb.append(month).append("-").append(year).toString();
 	}
+
+	static public Double annualToMonth(Double annualRate) {
+		return 100.0*(Math.pow(1+annualRate/100.0, 1.0/12.0)-1.0);
+	}
+	
+	static public double annualToMonth(double annualRate) {
+		return 100.0*(Math.pow(1+annualRate/100.0, 1.0/12.0)-1.0);
+	}
 }
