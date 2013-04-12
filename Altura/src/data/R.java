@@ -14,6 +14,7 @@ public class R implements Runnable{
 	public Object executeR(ArrayList<String> commands) {
 		
 		try {
+			System.out.println(commands);
 			ArrayList<Double> prices = new ArrayList<Double>();
 			PrintWriter csvOut = new PrintWriter(new File(rscriptFileName).getAbsoluteFile());
 			csvOut.println("#!/usr/bin/env Rscript");
