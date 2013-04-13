@@ -4,6 +4,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -417,11 +419,22 @@ public class MainWindow {
 						ContentController cc = new ContentController();
 						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
 						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
-									
+						
+						ArrayList<String[]> sortedContents = new ArrayList<String[]>();
+						int cSize = tableContents.size();
+						for (int si=0;si<cSize;si++) {
+							
+							for (int sj=0;sj<cSize;sj++) {
+								
+							}
+						}
+						
+						Comparator<String[]> contentComparator = new ContentComparator();			
+						Collections.sort(tableContents, contentComparator);
+						
 						for (int i=0;i<n;i++) {
 							tItems[i].setText(tableContents.get(i));
 						}
-						System.out.println("out");
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -486,9 +499,9 @@ public class MainWindow {
 					}
 				}
 			});
-			for (int i=0;i<npvCalTitle2.length;i++) {
+			for (int i=0;i<npvCalTitle.length;i++) {
 				TableColumn tableColumn = new TableColumn(portfolioTable, SWT.NONE);
-				tableColumn.setText(npvCalTitle2[i]);
+				tableColumn.setText(npvCalTitle[i]);
 				tableColumn.setWidth(npvCalColumnWidth);
 			}
 			
@@ -665,4 +678,55 @@ public class MainWindow {
 		arcPortfolio = new Portfolio();
 		arcPortfolio.initialPortfolio();
 	}
+	
+}
+
+class ContentComparator implements Comparator<String[]> {
+
+	@Override
+	public int compare(String[] arg0, String[] arg1) {
+		for (int i=0;i<arg0.length;i++) {
+			System.out.print(arg0[i] + "--");
+		}
+		System.out.println();
+		for (int i=0;i<arg1.length;i++) {
+			System.out.print(arg1[i] + "--");
+		}
+		System.out.println();
+		
+		//get index of "Zillow Estimate"
+		int indexZ = 0;
+		for (indexZ=0;indexZ<npvCalTitle.length;indexZ++) {
+			if (npvCalTitle[indexZ].equals("Zillow Estimate")) break;
+		}
+		//get index of "today's estimate"
+		int indexT = 0;
+		for (indexT=0;indexT<npvCalTitle.length;indexT++) {
+			if (npvCalTitle[indexT].equals("Today's Est. Price")) break;
+		}
+		double priceDiff0, priceDiff1;
+//		String zPriceStr = Formater.currencyToString(arg0[indexZ]);
+//		String tPriceStr = Formater.currencyToString(arg0[indexT]);
+		String zPriceStr = arg0[indexZ];
+		String tPriceStr = arg0[indexT];
+		System.out.println(zPriceStr + "-" + tPriceStr);
+		priceDiff0 = Double.valueOf(zPriceStr)-Double.valueOf(tPriceStr);
+		priceDiff0 = Math.abs(priceDiff0);
+		
+//		zPriceStr = Formater.currencyToString(arg1[indexZ]);
+//		tPriceStr = Formater.currencyToString(arg1[indexT]);
+		zPriceStr = arg1[indexZ];
+		tPriceStr = arg1[indexT];
+		System.out.println(zPriceStr + "-" + tPriceStr);
+		priceDiff1 = Double.valueOf(zPriceStr)-Double.valueOf(tPriceStr);
+		priceDiff1 = Math.abs(priceDiff1);
+		
+		if (priceDiff0>=priceDiff1)
+			return 1;
+		else 
+			return -1;
+		//else
+		//	return 0;
+	}
+	
 }

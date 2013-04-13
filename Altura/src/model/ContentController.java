@@ -15,7 +15,8 @@ import data.*;
 public class ContentController {
 	private int timelineLength = 24;
 	
-	public static final double gapThredshold = 0.25;
+	public static final double sfrGapThredshold = 0.25;
+	public static final double condoGapThreshold = 0.165;
 	
 	public static final int DISPLAY_DEFAULT		 		= 0;
 	public static final int DISPLAY_NPV_PARAMS	 		= 1;
@@ -106,7 +107,7 @@ public class ContentController {
 					
 					
 					Double todayPrice=1.0, projPrice=1.0, zillowPrice=null;
-					for (int j=0;j<ViewConst.npvCalTitle2.length;j++) {
+					for (int j=0;j<ViewConst.npvCalTitle.length;j++) {
 						switch (j) {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
@@ -163,58 +164,58 @@ public class ContentController {
 								zillowPrice = null;
 							} else {
 								zillowPrice = Double.valueOf(zEstimateStr);
-								row.add(j, Formater.toCurrency(zillowPrice));
+								//row.add(j, Formater.toCurrency(zillowPrice));
+								row.add(j, zEstimateStr);
 							}
 							break;
 						}
 						case 7: { //Today's Est. Price
 							Double indexValue = index.getIndex(now);
-							Double price1, price2;
+							Double priceCS, priceA;
 							if (type.equalsIgnoreCase("SFR")) {
-								price1 = regression.predict(Regression.SFR_CS_COEFF_INDEX, numBedrms, numBathrms, 
+								priceCS = regression.predict(Regression.SFR_CS_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
-								price2 = regression.predict(Regression.SFR_A_COEFF_INDEX, numBedrms, numBathrms, 
+								priceA = regression.predict(Regression.SFR_A_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
 							} else if (type.equalsIgnoreCase("Condo")) { //type==Code
-								price1 = regression.predict(Regression.CONDO_CS_COEFF_INDEX, numBedrms, numBathrms, 
+								priceCS = regression.predict(Regression.CONDO_CS_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
-								price2 = regression.predict(Regression.CONDO_A_COEFF_INDEX, numBedrms, numBathrms, 
+								priceA = regression.predict(Regression.CONDO_A_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
 							} else {
-								price1 = null;
-								price2 = null;
+								priceCS = null;
+								priceA = null;
 							}
+							
+							
 							//set todayPrice to the closed price
 							if (zillowPrice==null) {
-								todayPrice=price1;
+								todayPrice=priceCS;
 							} else  { //zillowPrice is not null
-								if (price1==null && price2==null) {
+								if (priceCS==null && priceA==null) {
 									todayPrice=zillowPrice;
-									System.out.println("line: " + i + "price1 and price2 both null");
-								} else if (price1==null && price2!=null) {
-									todayPrice=(price2<=zillowPrice*(1+gapThredshold) && price2>=zillowPrice*(1-gapThredshold)) ? price2 : zillowPrice;
-									System.out.println("line: " + i + "active price selected, cs price null");
-								} else if (price1!=null && price2==null) {
-									todayPrice=(price1<=zillowPrice*(1+gapThredshold) && price1>=zillowPrice*(1-gapThredshold)) ? price1 : zillowPrice;
-									System.out.println("line: " + i + "cs price selected, a price null");
-								} else if (price1!=null && price2!=null) {
-									double csDiff = Math.abs(price1/zillowPrice-1);
-									double aDiff = Math.abs(price2/zillowPrice-1);
-									if (csDiff<=gapThredshold && aDiff<=gapThredshold) 
-										todayPrice=(csDiff>aDiff) ? price2 :price1;
-									else if (csDiff<=gapThredshold && aDiff>gapThredshold)
-										todayPrice=price1;
-									else if (csDiff>gapThredshold && aDiff<=gapThredshold)
-										todayPrice=price2;
+								} else if (priceCS==null && priceA!=null) {
+									todayPrice=(priceA<=zillowPrice*(1+sfrGapThredshold) && priceA>=zillowPrice*(1-sfrGapThredshold)) ? priceA : zillowPrice;
+								} else if (priceCS!=null && priceA==null) {
+									todayPrice=(priceCS<=zillowPrice*(1+sfrGapThredshold) && priceCS>=zillowPrice*(1-sfrGapThredshold)) ? priceCS : zillowPrice;
+								} else if (priceCS!=null && priceA!=null) {
+									double csDiff = Math.abs(priceCS/zillowPrice-1);
+									double aDiff = Math.abs(priceA/zillowPrice-1);
+									if (csDiff<=sfrGapThredshold && aDiff<=sfrGapThredshold) 
+										todayPrice=(csDiff>aDiff) ? priceA :priceCS;
+									else if (csDiff<=sfrGapThredshold && aDiff>sfrGapThredshold)
+										todayPrice=priceCS;
+									else if (csDiff>sfrGapThredshold && aDiff<=sfrGapThredshold)
+										todayPrice=priceA;
 									else
 										todayPrice=zillowPrice;
-									System.out.println("line: " + i + "both not null, cs: " + csDiff + " a: " + aDiff);
 								}
 							}
 							if (todayPrice == null) {
 								 row.add(j, "N/A");
 							} else {
-								row.add(j, Formater.toCurrency(todayPrice));
+//								row.add(j, Formater.toCurrency(todayPrice));
+								row.add(j, String.valueOf(todayPrice));
 							}
 							break;
 						}
@@ -239,7 +240,8 @@ public class ContentController {
 							if (projPrice==null) {
 								row.add(j, "N/A");
 							} else {
-								row.add(j, Formater.toCurrency(projPrice));
+//								row.add(j, Formater.toCurrency(projPrice));
+								row.add(j, String.valueOf(projPrice));
 							}
 							break;
 						}
@@ -264,6 +266,7 @@ public class ContentController {
 				break;
 			}
 			}
+			break;
 		}
 		case DISPLAY_DEFAULT: {
 			switch (options[1]) {
@@ -315,7 +318,7 @@ public class ContentController {
 				for (int i=0;i<numRecords;i++) {
 					ArrayList<String> row = new ArrayList<String>();
 					HashMap<String, String> portfolioRow = tempPortfolio.getEntry(i);
-					for (int j=0;j<ViewConst.npvCalTitle2.length;j++) {
+					for (int j=0;j<ViewConst.npvCalTitle.length;j++) {
 						switch (j) {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						
@@ -333,7 +336,7 @@ public class ContentController {
 				for (int i=0;i<numRecords;i++) {
 					ArrayList<String> row = new ArrayList<String>();
 					HashMap<String, String> portfolioRow = tempPortfolio.getEntry(i);
-					for (int j=0;j<ViewConst.npvCalTitle2.length;j++) {
+					for (int j=0;j<ViewConst.npvCalTitle.length;j++) {
 						switch (j) {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}

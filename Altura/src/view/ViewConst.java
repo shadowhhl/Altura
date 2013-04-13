@@ -159,7 +159,7 @@ public class ViewConst {
 //												"Characteristics of the Property", "Our estimated prices",
 //												"Management of the Property", "Rent it and sell it later", 
 //												"Sell it now", "Hold and sell later"};
-	public static final String[] npvCalTitle2 = {"Loan Account", "Zip Code", 
+	public static final String[] npvCalTitle = {"Loan Account", "Zip Code", 
 												"Street", "Type", "Projected Timeline", "Lot Size", 
 												"Zillow Estimate", "Today's Est. Price", "Proj. Timeline Est. Price",
 												"Change in Value", "Appraiser FMV", "Value", "Projected Recovery"};
