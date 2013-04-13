@@ -66,7 +66,7 @@ public class NpvAnalyzer {
 	
 	public void doQuery(String accountNo)  {
 		sqlStmt = "select arc_AppraiserFMV from ARC_CU_Data where arc_Account = '" + accountNo + "'";
-		System.out.println(sqlStmt);
+		//System.out.println(sqlStmt);
 		
 		db.query(sqlStmt);
 		rs = db.getResultSet();

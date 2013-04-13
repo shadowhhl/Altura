@@ -130,10 +130,74 @@ public class Regression{
 		}
 	}
 	
-	public void predict(int numBedrms, double numBathrms, int age, double lotSize, double currentIndex, String zipCode) {
+	public Double predict(int index, int numBedrms, double numBathrms, int age, double lotSize, double currentIndex, String zipCode) {
+		HashMap<String, Double> coeff = new HashMap<String, Double>();
+		Double predictPrice = 0.0;
 		//when doing prediction, leave out zipcode is not in the hashmap, while zipcodes with NA values return null
+		//It is important to find the coefficient of zip code
+		Double coeffIntercept;
+		Double coeffZipcode;
+		Double coeffNumBeds;
+		Double coeffNumBaths;
+		Double coeffAge;
+		Double coeffSize;
+		Double coeffIndex;
+		switch (index) {
+		case CONDO_CS_COEFF_INDEX:
+			coeff = condo_cs_Coefficients;
+			break;
+		case CONDO_A_COEFF_INDEX:
+			coeff = condo_a_Coefficients;
+			break;
+		case SFR_CS_COEFF_INDEX:
+			coeff = sfr_cs_Coefficients;
+			break;
+		case SFR_A_COEFF_INDEX:
+			coeff = sfr_a_Coefficients;
+			break;
+		}
 		
+		if (coeff.containsKey("X"+zipCode)) {
+			if (coeff.get("X"+zipCode)==null) {
+				predictPrice = null;
+				return predictPrice;
+			} else {
+				coeffZipcode = coeff.get("X"+zipCode);
+			}
+		} else {
+			coeffZipcode = 0.0;
+		}
+		coeffIntercept = coeff.get("(Intercept)");
+		coeffNumBeds = coeff.get("X.BD");
+		coeffNumBaths = coeff.get("X.Bth");
+		coeffAge = coeff.get("AGE");
+		coeffSize = coeff.get("Size");
 		
+		switch (index) {
+		case CONDO_CS_COEFF_INDEX:
+		case SFR_CS_COEFF_INDEX:
+			coeffIndex = coeff.get("schiller.value");
+			//System.out.println(coeffIndex);
+			predictPrice = Math.exp(coeffIntercept
+									+coeffNumBeds*Math.log(numBedrms)
+									+coeffNumBaths*Math.log(numBathrms)
+									+coeffAge*Math.log(age)
+									+coeffSize*Math.log(lotSize)
+									+coeffZipcode
+									+coeffIndex*currentIndex);
+			break;
+		case CONDO_A_COEFF_INDEX:
+		case SFR_A_COEFF_INDEX:
+			coeffIndex = null;
+			predictPrice = Math.exp(coeffIntercept
+									+coeffNumBeds*Math.log(numBedrms)
+									+coeffNumBaths*Math.log(numBathrms)
+									+coeffAge*Math.log(age)
+									+coeffSize*Math.log(lotSize)
+									+coeffZipcode);
+			break;
+		}
+		return predictPrice; 
 	}
 	
 	public ArrayList<Double> predict(int numBedrms, double numBathrms, int age, double lotSize, ArrayList<Double> currentIndex, String zipCode) {

@@ -85,21 +85,10 @@ public class Portfolio {
 			Double value = values.get(accountNum);
 			Double projectedPrice = projectedPrices.get(accountNum);
 			Calendar pTimeline = projectedTimelines.get(accountNum);
-//			Calendar now = Calendar.getInstance();
-//			long millisDiff = pTimeline.getTimeInMillis() - now.getTimeInMillis();
-//			double monthDiff = millisDiff/1000.0/3600.0/24.0/30.0;
 			
 			Double rentalOverPeriod = Double.valueOf(portfolio.get(i).get("Rental Over Period"));
 			Double maintenanceOverPeriod = Double.valueOf(portfolio.get(i).get("Maintenance Over Period"));
 			Double ARCPrice, AlturaPrice;
-//			if (millisDiff > 0) {
-//				ARCPrice = rentalOverPeriod-maintenanceOverPeriod+(value*(1-transactionCost/100.0))/(Math.pow(1+monthIRR/100, monthDiff));
-//				AlturaPrice = rentalOverPeriod-maintenanceOverPeriod+(projectedPrice*(1-transactionCost/100.0))/(Math.pow(1+monthIRR/100, monthDiff));
-//			}
-//			else {
-//				ARCPrice = 0.0;
-//				AlturaPrice = 0.0;
-//			}
 			ARCPrice = getProperyRentAndSell(value, monthIRR, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
 			AlturaPrice = getProperyRentAndSell(projectedPrice, monthIRR, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
 			
