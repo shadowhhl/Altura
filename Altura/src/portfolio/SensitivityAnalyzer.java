@@ -6,10 +6,7 @@ import java.util.HashMap;
 
 import data.Index;
 
-import model.Formater;
-import model.NpvAnalyzer;
-import model.ParamList;
-import model.Regression;
+import model.*;
 
 public class SensitivityAnalyzer{
 	HashMap<String, HashMap<Calendar, Double> > projectedPrices; //<AccountNum, Prices at different date>

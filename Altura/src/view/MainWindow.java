@@ -25,13 +25,13 @@ public class MainWindow {
 	public Table outputNPVTable;
 	public Table outputStatsTable;
 	private Table portfolioTable;
-	private Table senNpvTable;
+	
 	private Table statsNpvTable;
 	private Composite outputImageComposite;
 	private Composite senImageComposite;
 	private Composite statsImageComposite0;
 	private Composite statsImageComposite1;
-	
+	private Button npvUpdateButton;
 	private int currentSelectedLoanIndex = 0;
 	
 	private ParamList paramList;
@@ -236,7 +236,7 @@ public class MainWindow {
 		case 0: {
 			ArrayList<String> defaultContents = new ArrayList<String>();
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_STATS_PARAMS};
-			defaultContents = cc.getDefaultContent(displayOptions, null);
+			defaultContents = cc.getParamContent(displayOptions, null);
 			for (int i=0;i<statsParamsNames.length;i++) {
 				Label label = new Label(group, SWT.NONE);
 				label.setBounds(10, i*(statsParamHeight+5), 
@@ -251,7 +251,7 @@ public class MainWindow {
 									statsParamHeight+11);
 					ArrayList<String> contents = new ArrayList<String>();
 					int[] options = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_ALL_ACOUNT_NUM};
-					contents = cc.getDefaultContent(options, arcPortfolio);
+					contents = cc.getParamContent(options, arcPortfolio);
 					String[] comboList = new String[contents.size()];
 					contents.toArray(comboList);
 					combo.setItems(comboList);
@@ -286,6 +286,7 @@ public class MainWindow {
 			buttonUpdate.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseDown(MouseEvent e) {
+					System.out.println("create stat group adapter");
 //					System.out.println(paramList);
 //
 //					TableItem[] tItems =  statsNpvTable.getItems();
@@ -312,7 +313,7 @@ public class MainWindow {
 		case 1: {
 			ArrayList<String[]> defaultContents = new ArrayList<String[]>();
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_STATS_NPV_TABLE};
-			defaultContents = cc.getDefaultTableContent(displayOptions, null);
+			defaultContents = cc.getTableContent(displayOptions, null);
 			
 			for (int i=0;i<statsNpvGroupControlXs.length;i++) {
 				Composite composite = new Composite(group, SWT.NONE);
@@ -346,185 +347,13 @@ public class MainWindow {
 		}
 	}
 	
-	private void createSenGroup(Group group, int index) {
-		ContentController cc = new ContentController();
-		switch (index) {
-		case 0: {
-			ArrayList<String> defaultContent = new ArrayList<String>();
-			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_SEN_PARAMS1};
-			defaultContent = cc.getDefaultContent(displayOptions, null);
-			for (int i=0;i<senParamsNames0.length;i++) {
-				Label label = new Label(group, SWT.NONE);
-				label.setBounds(senParamXs[0], i*(senParamHeight+5), 
-								senParamLabelWidth, senParamHeight);
-				label.setText(senParamsNames0[i]);
-				if (i==0) {
-					final Combo combo = new Combo(group, SWT.BORDER);
-					combo.setBounds(senParamXs[0]+senParamLabelWidth+10, 
-							   i*(senParamHeight+5), 
-							   senParamTextWidth+comboWidthOffset, 
-							   senParamHeight+11);
-					ArrayList<String> contents = new ArrayList<String>();
-					int[] options = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_ALL_ACOUNT_NUM};
-					contents = cc.getDefaultContent(options, arcPortfolio);
-					String[] comboList = new String[contents.size()];
-					contents.toArray(comboList);
-					combo.setItems(comboList);
-					combo.select(currentSelectedLoanIndex);
-					combo.addModifyListener(new ModifyListener() {
-						
-						@Override
-						public void modifyText(ModifyEvent arg0) {
-							// TODO Auto-generated method stub
-							//System.out.println(combo.getSelectionIndex());
-							currentSelectedLoanIndex=combo.getSelectionIndex();
-						}
-					});
-				}
-				else {
-					final Text text = new Text(group, SWT.NONE);
-					text.setBounds(senParamXs[0]+senParamLabelWidth+10, 
-							   i*(senParamHeight+5), 
-							   senParamTextWidth, 
-							   senParamHeight);
-					text.setEditable(senParamsEditable0[i]);
-					if (senParamsEditable0[i]==true) 
-						text.setBackground(getColor(SWT.COLOR_WHITE));
-					else
-						text.setBackground(getColor(SWT.COLOR_GRAY));
-					text.setText(defaultContent.get(i));
-					text.setData("id", senParamsNames0[i]);
-					text.addModifyListener(new ModifyListener() {
-						public void modifyText(ModifyEvent arg0) {
-							try {
-								String key = (String)text.getData("id");
-								paramList.setParamValue(key, text.getText());
-								if (key.equals("IRR (%)")) {
-									String irrStr = text.getText();
-									Double irr = Double.valueOf(irrStr);
-									Double monthIrr = 100.0*(Math.pow(1+irr/100.0, 1.0/12.0)-1.0);
-									paramList.setParamValue("Monthly IRR (%)", monthIrr.toString());
-									
-									Control[] controls = text.getParent().getChildren();
-									for (int i=0;i<controls.length;i++) {
-										String names = (String)controls[i].getData("id");
-										if (names!=null) {
-											if (names.equals("Monthly IRR (%)")) {
-												Text tmpText = (Text)controls[i];
-												
-												tmpText.setText(Formater.toShortDouble(monthIrr.doubleValue(), 2));
-											}
-										}
-									}
-								}
-								
-								if (key.equals("Maintenance costs (%)")) {
-									Double mCost = Double.valueOf(text.getText());
-									Double monthMCost = 100.0*(Math.pow(1+mCost/100.0, 1.0/12.0)-1.0);
-									paramList.setParamValue("Monthly Maintenance costs (%)", monthMCost.toString());
-									
-									Control[] controls = text.getParent().getChildren();
-									for (int i=0;i<controls.length;i++) {
-										String names = (String)controls[i].getData("id");
-										if (names!=null) {
-											if (names.equals("Monthly Maintenance costs (%)")) {
-												Text tmpText = (Text)controls[i];
-												
-												tmpText.setText(Formater.toShortDouble(monthMCost.doubleValue(), 2));
-											}
-										}
-									}
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					});
-				}
-				
-			}
-			for (int i=0;i<senParamsNames1.length;i++) {
-				Label label = new Label(group, SWT.NONE);
-				Text text = new Text(group, SWT.NONE);
-				
-				label.setBounds(senParamXs[1], i*(senParamHeight+5), 
-								senParamLabelWidth, senParamHeight);
-				label.setText(senParamsNames1[i]);
-				text.setBounds(senParamXs[1]+senParamLabelWidth+10, 
-							   i*(senParamHeight+5), 
-							   senParamTextWidth, 
-							   senParamHeight);
-				text.setEditable(senParamsEditable1[i]);
-				if (senParamsEditable1[i]==true) 
-					text.setBackground(getColor(SWT.COLOR_WHITE));
-				else
-					text.setBackground(getColor(SWT.COLOR_GRAY));
-			}
-			Button buttonUpdate = new Button(group, SWT.BORDER);
-			buttonUpdate.setText(updateString);
-			buttonUpdate.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
-			buttonUpdate.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseDown(MouseEvent e) {
-					System.out.println(paramList);
-					int numTimelines = senNpvTable.getItemCount();
-					TableItem[] tItems =  senNpvTable.getItems();
-					
-					ArrayList<String[]> updatedContent = new ArrayList<String[]>();
-					ContentController cc = new ContentController();
-					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
-					for (int j=0;j<updatedContent.size();j++) {
-						System.out.println(updatedContent.get(j));
-						tItems[j].setText(updatedContent.get(j));
-					}
-				}
-			});
-			break;
-		}
-		case 1: {
-			ArrayList<String[]> defaultContent = new ArrayList<String[]>();
-			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_SEN_NPV_TABLE};
-			defaultContent = cc.getDefaultTableContent(displayOptions, null);
-			
-			for (int i=0;i<senNpvGroupControlXs.length;i++) {
-				Composite composite = new Composite(group, SWT.NONE);
-				composite.setBounds(senNpvGroupControlXs[i], 
-									10, 
-								    senNpvGroupControlWidths[i], 
-								    senNpvGroupControlHeight);
-				if (i==0) {  //create table
-					senNpvTable = new Table(composite, SWT.BORDER|SWT.FULL_SELECTION);
-					senNpvTable.setHeaderVisible(true);
-					senNpvTable.setLinesVisible(true);
-					senNpvTable.setBounds(0, 0, senNpvTableWidth, senNpvTableHeight);
-
-					for (int j=0;j<senNpvTableNames.length;j++) {
-						TableColumn tableColumn = new TableColumn(senNpvTable, SWT.NONE);
-						tableColumn.setText(senNpvTableNames[j]);
-						tableColumn.setWidth(senNpvTableColumnWidth[j]);
-					}
-					
-					for (int j=0;j<defaultContent.size();j++) {
-						TableItem tableItem = new TableItem(senNpvTable, SWT.NONE);
-						tableItem.setText(defaultContent.get(j));
-					}
-				}
-				else { //create graph
-					
-				}
-			}
-			break;
-		}
-		}
-	}
-	
 	private void createNpvGroup(Group group, int index) {
 		ContentController cc = new ContentController();
 		ArrayList<String> defaultContent = new ArrayList<String>();
 		switch (index) {
 		case 0: {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_PARAMS};
-			defaultContent = cc.getDefaultContent(displayOptions, null);
+			defaultContent = cc.getParamContent(displayOptions, null);
 			for (int i=0;i<npvParamsNames.length;i++) {
 				Label label = new Label(group, SWT.NONE);
 				final Text text = new Text(group, SWT.NONE);
@@ -567,79 +396,51 @@ public class MainWindow {
 					}
 				});
 			}
-			Button buttonUpdate = new Button(group, SWT.BORDER);
-			buttonUpdate.addMouseListener(new MouseAdapter() {
+			npvUpdateButton = new Button(group, SWT.BORDER);
+			MouseListener listener = new MouseListener() {
+				
 				@Override
-				public void mouseDown(MouseEvent e) {
+				public void mouseUp(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseDown(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					System.out.println("create NPV group adapter");
 					try {
 						int n=portfolioTable.getItemCount();
 						//get items from table
 						TableItem[] tItems = portfolioTable.getItems();
-						HashMap<String, Double> rentalZEstimates = new HashMap<String, Double>();
-						HashMap<String, Calendar> projectedTimelines = new HashMap<String, Calendar>();
-						HashMap<String, Double> values = new HashMap<String, Double>();
-						HashMap<String, Double> projectedPrices = new HashMap<String, Double>();
-						
-//						for (int i=0;i<n;i++) {
-//							//get account num
-//							String accountNum = tItems[i].getText(0);
-//							//parse rental
-//							Double rental = Double.valueOf(arcPortfolio.getEntry(i).get("Zestimate Rental"));
-//							//parse value
-////							Double value = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
-//							//parse projected price
-//							//TODO change the projected price
-//							Double projectedPrice = Double.valueOf(arcPortfolio.getEntry(i).get("Value"));
-//							//parse date
-//							String dateStr = tItems[i].getText(6);
-//							SimpleDateFormat dFormat = new SimpleDateFormat("M-d-yyyy");
-//							Date pDate;
-//							
-//							pDate = dFormat.parse(dateStr);
-//							Calendar pTimeline = Calendar.getInstance();
-//							pTimeline.setTime(pDate);
-//							//add hashmap
-//							rentalZEstimates.put(accountNum, rental);
-//							projectedTimelines.put(accountNum, pTimeline);
-//							values.put(accountNum, value);
-//							projectedPrices.put(accountNum, projectedPrice);
-//						
-//						}
-						//get parameters
-					
-//						Double monthIRR = Double.valueOf(paramList.getParam(npvParamsNames[2]));
-						String todayDateStr = paramList.getParam(npvParamsNames[0]);
-//						Double maintenanceCost = Double.valueOf(paramList.getParam(npvParamsNames[4]));
-//						Double transactionCost = Double.valueOf(paramList.getParam(npvParamsNames[5]));
-						Calendar todayDate = Calendar.getInstance();
-						todayDate.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(todayDateStr));
-						
-						//System.out.println(paramList);
-//						arcPortfolio.updatePortfolioRentalOverPeriod(rentalZEstimates, monthIRR, projectedTimelines, todayDate);
-//						arcPortfolio.updatePortfolioMaintenanceCostOverPeriod(values, maintenanceCost, monthIRR, projectedTimelines, todayDate);
-//						arcPortfolio.updatePortfolioRentAndSell(values, maintenanceCost, monthIRR, transactionCost, projectedTimelines, projectedPrices, todayDate);
-//						arcPortfolio.updatePortfolioSellNow(values, projectedPrices, transactionCost);
-//						arcPortfolio.updatePortfolioHoldAndSell(values, projectedPrices, monthIRR, projectedTimelines, transactionCost, todayDate);
-						
+
 						ContentController cc = new ContentController();
 						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
-						ArrayList<String[]> tableContents = cc.getDefaultTableContent(displayOptions, arcPortfolio);
+						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
 									
 						for (int i=0;i<n;i++) {
 							tItems[i].setText(tableContents.get(i));
 						}
+						System.out.println("out");
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
-			});
-			buttonUpdate.setText(updateString);
-			buttonUpdate.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
+				
+				@Override
+				public void mouseDoubleClick(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+			};
+			npvUpdateButton.addMouseListener(listener);
+			npvUpdateButton.setText(updateString);
+			npvUpdateButton.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
 			break;
 		}
 		case 1: {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_STATS};
-			defaultContent = cc.getDefaultContent(displayOptions, null);
+			defaultContent = cc.getParamContent(displayOptions, null);
 			for (int i=0;i<npvStatsNames.length;i++) {
 				Label label = new Label(group, SWT.NONE);
 				Text text = new Text(group, SWT.NONE);
@@ -654,7 +455,7 @@ public class MainWindow {
 		}
 		case 2: {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_TABLE};
-			ArrayList<String[]> tableContents = cc.getDefaultTableContent(displayOptions, arcPortfolio);
+			ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
 			portfolioTable = new Table(group, SWT.BORDER|SWT.FULL_SELECTION);
 			portfolioTable.setHeaderVisible(true);
 			portfolioTable.setLinesVisible(true);
@@ -666,7 +467,7 @@ public class MainWindow {
 				public void handleEvent(Event e) {
 					try {
 						ContentController cc = new ContentController();
-						//System.out.println(portfolioTable.getSelectionIndex());
+						System.out.println(portfolioTable.getSelectionIndex());
 						int selectionIndex = portfolioTable.getSelectionIndex();
 						HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
 						Integer numBedrooms = Integer.valueOf(selectedRow.get("#Bedrooms"));
@@ -733,7 +534,7 @@ public class MainWindow {
 			
 			ArrayList<String[]> portfolioNpv = new ArrayList<String[]>();
 			int[] options = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_OUTPUT_NPV_TABLE};
-			portfolioNpv = cc.getDefaultTableContent(options, arcPortfolio);
+			portfolioNpv = cc.getTableContent(options, arcPortfolio);
 			for (int i=0;i<portfolioNpv.size();i++) {
 				TableItem tItem = new TableItem(outputNPVTable, SWT.NONE);
 				tItem.setText(portfolioNpv.get(i));
@@ -763,7 +564,7 @@ public class MainWindow {
 			});
 			ArrayList<String> contents = new ArrayList<String>();
 			int[] options = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_ALL_ACOUNT_NUM};
-			contents = cc.getDefaultContent(options, arcPortfolio);
+			contents = cc.getParamContent(options, arcPortfolio);
 			String[] comboList = new String[contents.size()];
 			contents.toArray(comboList);
 			lsCombo.setItems(comboList);
@@ -805,7 +606,7 @@ public class MainWindow {
 			ArrayList<String[]> portfolioStat = new ArrayList<String[]>();
 			options[0] = ContentController.DISPLAY_DEFAULT;
 			options[1] = ContentController.DISPLAY_OUTPUT_STATS_TABLE;
-			portfolioStat = cc.getDefaultTableContent(options, null);
+			portfolioStat = cc.getTableContent(options, null);
 			for (int i=0;i<portfolioStat.size();i++) {
 				TableItem tItem = new TableItem(outputStatsTable, SWT.NONE);
 				tItem.setText(portfolioStat.get(i));

@@ -161,13 +161,9 @@ public class ViewConst {
 //												"Sell it now", "Hold and sell later"};
 	public static final String[] npvCalTitle2 = {"Loan Account", "Zip Code", 
 												"Street", "Appraiser FMV", "Value", "Projected Recovery",
-												"Projected Timeline", "Lot Size", "Rental (Zestimate)",
-												"Today's Est. Price", "Proj. Timeline Est. Price",
-												"Change in Value", "Rental over the Period",
-												"Maintenance Costs over the period", 
-												"Rent and sell later_ARC", "Rent and sell later_Altura", 
-												"Sell now_ARC", "Sell now_Altura", 
-												"Hold and sell later_ARC", "Hold and sell later_Altura"};
+												"Projected Timeline", "Lot Size", 
+												"Zillow Estimate", "Today's Est. Price", "Proj. Timeline Est. Price",
+												"Change in Value"};
 	public static final int npvCalWidth = 900;
 	public static final int npvCalHeight = 180;
 	public static final int npvCalColumnWidth = 100;

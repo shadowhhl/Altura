@@ -72,7 +72,7 @@ public class ContentController {
 		return contents;
 	}
 	
-	public ArrayList<String[]> getDefaultTableContent(int[] options, Object addObj) {
+	public ArrayList<String[]> getTableContent(int[] options, Object addObj) {
 		ArrayList<String[]> contents = new ArrayList<String[]>();
 		switch(options[0]) {
 		case DISPLAY_UPDATE: {
@@ -84,6 +84,8 @@ public class ContentController {
 			case DISPLAY_NPV_TABLE: {
 				Portfolio tempPortfolio = (Portfolio)addObj;
 				int numRecords = tempPortfolio.getPortfolioSize();
+				Regression regression = new Regression();
+				
 				for (int i=0;i<numRecords;i++) {
 					ArrayList<String> row = new ArrayList<String>();
 					HashMap<String, String> portfolioRow = tempPortfolio.getEntry(i);
@@ -93,12 +95,60 @@ public class ContentController {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
 						case 2: {row.add(j, portfolioRow.get("Street"));break;}
-//						case 3: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Appraiser FMV"))));break;}
-//						case 4: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Value"))));break;}
-//						case 5: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Projected Recovery"))));break;}
-//						case 6: {row.add(j, portfolioRow.get("Projected Timeline"));break;}
-						case 7: {row.add(j, portfolioRow.get("Size/SqFeet"));break;}
-//						case 8: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Zestimate Rental"))));break;}
+						case 3: {
+							String appraiserFMVStr = portfolioRow.get("Appraiser FMV");
+							if (appraiserFMVStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(appraiserFMVStr)));
+							}
+							break;
+						}
+						case 4: {
+							String valueStr = portfolioRow.get("Value");
+							if (valueStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(valueStr)));
+							}
+							break;
+						}
+						case 5: {
+							String projRecStr = portfolioRow.get("Projected Recovery");
+							if (projRecStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(projRecStr)));
+							}
+							break;
+						}
+						case 6: {
+							String projTimeline = portfolioRow.get("Projected Timeline");
+							if (projTimeline==null) {
+								row.add(j,  "N/A");
+							} else {
+								row.add(j, projTimeline);
+							}
+							break;
+						}
+						case 7: {
+							String sizeStr = portfolioRow.get("Size/SqFeet");
+							if (sizeStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, sizeStr);
+							}
+							break;
+						}
+						case 8: {
+							String zEstimateStr = portfolioRow.get("Zestimate Px");
+							if (zEstimateStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(zEstimateStr)));
+							}
+							break;
+						}
 						case 9: { //Today's Est. Price
 							Calendar now = Calendar.getInstance();
 							
@@ -117,7 +167,7 @@ public class ContentController {
 							todayPrice = prices.get(0);
 							row.add(j, Formater.toCurrency(todayPrice));
 							break;
-							}
+						}
 						case 10: { //projected price
 							try {
 								Calendar now = Calendar.getInstance();
@@ -144,16 +194,8 @@ public class ContentController {
 								e.printStackTrace();
 							}
 							break;
-							}
-//						case 11: {row.add(j, Formater.toPercentage(projPrice/todayPrice));break;}
-//						case 12: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rental Over Period"))));break;}
-//						case 13: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Maintenance Over Period"))));break;}
-//						case 14: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_ARC"))));break;}
-//						case 15: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Rent and Sell later_Altura"))));break;}
-//						case 16: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_ARC"))));break;}
-//						case 17: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Sell now_Altura"))));break;}
-//						case 18: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_ARC"))));break;}
-//						case 19: {row.add(j, Formater.toCurrency(Double.valueOf(portfolioRow.get("Hold and Sell later_Altura"))));break;}
+						}
+						case 11: {row.add(j, Formater.toPercentage(projPrice/todayPrice));break;}
 						default: {row.add(j, null);break;}
 						}
 					}
@@ -267,7 +309,7 @@ public class ContentController {
 		return contents;
 	}
 	
-	public ArrayList<String> getDefaultContent(int[] options, Object addObject) {
+	public ArrayList<String> getParamContent(int[] options, Object addObject) {
 		ArrayList<String> contents = new ArrayList<String>();
 		switch(options[0]) {
 		case DISPLAY_DEFAULT: {//default
