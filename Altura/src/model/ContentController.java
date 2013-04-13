@@ -15,7 +15,7 @@ import data.*;
 public class ContentController {
 	private int timelineLength = 24;
 	
-	public static final double sfrGapThredshold = 0.25;
+	public static final double sfrGapThreshold = 0.25;
 	public static final double condoGapThreshold = 0.165;
 	
 	public static final int DISPLAY_DEFAULT		 		= 0;
@@ -89,12 +89,13 @@ public class ContentController {
 				int numRecords = tempPortfolio.getPortfolioSize();
 				Regression regression = new Regression();
 				regression.regression();
+				boolean invalidRecord = false;
 				for (int i=0;i<numRecords;i++) {
+					invalidRecord = false;
 					ArrayList<String> row = new ArrayList<String>();
 					HashMap<String, String> portfolioRow = tempPortfolio.getEntry(i);
-					
+
 					Calendar now = Calendar.getInstance();
-					
 					int numBedrms = Integer.valueOf(portfolioRow.get("#Bedrooms"));
 					double numBathrms = Double.valueOf(portfolioRow.get("#Bathrooms"));
 					int lotSize = Integer.valueOf(portfolioRow.get("Size/SqFeet"));
@@ -105,13 +106,13 @@ public class ContentController {
 					Index index = new Index();
 					index.readIndex(Index.defaultCSIndexFileName);
 					
-					
 					Double todayPrice=1.0, projPrice=1.0, zillowPrice=null;
 					for (int j=0;j<ViewConst.npvCalTitle.length;j++) {
 						switch (j) {
 						case 0: {row.add(j, portfolioRow.get("Account"));break;}
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
 						case 2: {row.add(j, portfolioRow.get("Street"));break;}
+						case 3: {row.add(j, portfolioRow.get("Type"));break;}
 						case 10: {
 							String appraiserFMVStr = portfolioRow.get("Appraiser FMV");
 							if (appraiserFMVStr==null) {
@@ -164,8 +165,8 @@ public class ContentController {
 								zillowPrice = null;
 							} else {
 								zillowPrice = Double.valueOf(zEstimateStr);
-								//row.add(j, Formater.toCurrency(zillowPrice));
-								row.add(j, zEstimateStr);
+								row.add(j, Formater.toCurrency(zillowPrice));
+//								row.add(j, zEstimateStr);
 							}
 							break;
 						}
@@ -186,36 +187,27 @@ public class ContentController {
 								priceCS = null;
 								priceA = null;
 							}
-							
-							
-							//set todayPrice to the closed price
-							if (zillowPrice==null) {
-								todayPrice=priceCS;
-							} else  { //zillowPrice is not null
-								if (priceCS==null && priceA==null) {
-									todayPrice=zillowPrice;
-								} else if (priceCS==null && priceA!=null) {
-									todayPrice=(priceA<=zillowPrice*(1+sfrGapThredshold) && priceA>=zillowPrice*(1-sfrGapThredshold)) ? priceA : zillowPrice;
-								} else if (priceCS!=null && priceA==null) {
-									todayPrice=(priceCS<=zillowPrice*(1+sfrGapThredshold) && priceCS>=zillowPrice*(1-sfrGapThredshold)) ? priceCS : zillowPrice;
-								} else if (priceCS!=null && priceA!=null) {
-									double csDiff = Math.abs(priceCS/zillowPrice-1);
-									double aDiff = Math.abs(priceA/zillowPrice-1);
-									if (csDiff<=sfrGapThredshold && aDiff<=sfrGapThredshold) 
-										todayPrice=(csDiff>aDiff) ? priceA :priceCS;
-									else if (csDiff<=sfrGapThredshold && aDiff>sfrGapThredshold)
-										todayPrice=priceCS;
-									else if (csDiff>sfrGapThredshold && aDiff<=sfrGapThredshold)
-										todayPrice=priceA;
-									else
-										todayPrice=zillowPrice;
-								}
+							if (priceA!=null && priceCS!=null) {
+								double csDiff = Math.abs(priceCS/zillowPrice-1);
+								double aDiff = Math.abs(priceA/zillowPrice-1);
+								todayPrice = (csDiff<aDiff) ? priceCS : priceA;
+							} else if (priceA==null && priceCS != null) {
+								todayPrice = priceCS;
+							} else if (priceA != null && priceCS == null) {
+								todayPrice = priceA;
+							} else { 
+								todayPrice =zillowPrice;
 							}
-							if (todayPrice == null) {
-								 row.add(j, "N/A");
+							
+							if (type.equalsIgnoreCase("SFR") && Math.abs(todayPrice/zillowPrice-1)>sfrGapThreshold) {
+								row.add(j, "N/A");
+								invalidRecord = true;
+							} else if (type.equalsIgnoreCase("Condo") && Math.abs(todayPrice/zillowPrice-1)>condoGapThreshold) {
+								row.add(j, "N/A");
+								invalidRecord = true;
 							} else {
-//								row.add(j, Formater.toCurrency(todayPrice));
-								row.add(j, String.valueOf(todayPrice));
+								row.add(j, Formater.toCurrency(todayPrice));
+//								row.add(j, String.valueOf(todayPrice));
 							}
 							break;
 						}
@@ -240,8 +232,8 @@ public class ContentController {
 							if (projPrice==null) {
 								row.add(j, "N/A");
 							} else {
-//								row.add(j, Formater.toCurrency(projPrice));
-								row.add(j, String.valueOf(projPrice));
+								row.add(j, Formater.toCurrency(projPrice));
+//								row.add(j, String.valueOf(projPrice));
 							}
 							break;
 						}
@@ -256,9 +248,11 @@ public class ContentController {
 						default: {row.add(j, null);break;}
 						}
 					}
-					String[] newRow = new String[row.size()];
-					row.toArray(newRow);
-					contents.add(newRow);
+					if (!invalidRecord) {
+						String[] newRow = new String[row.size()];
+						row.toArray(newRow);
+						contents.add(newRow);
+					} 
 				}
 				break;
 				}

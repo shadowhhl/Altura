@@ -177,7 +177,6 @@ public class Regression{
 		case CONDO_CS_COEFF_INDEX:
 		case SFR_CS_COEFF_INDEX:
 			coeffIndex = coeff.get("schiller.value");
-			//System.out.println(coeffIndex);
 			predictPrice = Math.exp(coeffIntercept
 									+coeffNumBeds*Math.log(numBedrms)
 									+coeffNumBaths*Math.log(numBathrms)

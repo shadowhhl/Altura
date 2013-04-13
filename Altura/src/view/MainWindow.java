@@ -288,7 +288,6 @@ public class MainWindow {
 			buttonUpdate.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseDown(MouseEvent e) {
-					System.out.println("create stat group adapter");
 //					System.out.println(paramList);
 //
 //					TableItem[] tItems =  statsNpvTable.getItems();
@@ -410,30 +409,23 @@ public class MainWindow {
 				@Override
 				public void mouseDown(MouseEvent arg0) {
 					// TODO Auto-generated method stub
-					System.out.println("create NPV group adapter");
 					try {
-						int n=portfolioTable.getItemCount();
 						//get items from table
 						TableItem[] tItems = portfolioTable.getItems();
-
+						
 						ContentController cc = new ContentController();
 						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
 						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
 						
-						ArrayList<String[]> sortedContents = new ArrayList<String[]>();
-						int cSize = tableContents.size();
-						for (int si=0;si<cSize;si++) {
-							
-							for (int sj=0;sj<cSize;sj++) {
-								
-							}
-						}
-						
 						Comparator<String[]> contentComparator = new ContentComparator();			
 						Collections.sort(tableContents, contentComparator);
 						
-						for (int i=0;i<n;i++) {
-							tItems[i].setText(tableContents.get(i));
+						for (int i=0;i<tItems.length;i++) {
+							tItems[i].dispose();
+						}
+						for (int i=0;i<tableContents.size();i++) {
+							TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+							tItem.setText(tableContents.get(i));
 						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
@@ -685,15 +677,6 @@ class ContentComparator implements Comparator<String[]> {
 
 	@Override
 	public int compare(String[] arg0, String[] arg1) {
-		for (int i=0;i<arg0.length;i++) {
-			System.out.print(arg0[i] + "--");
-		}
-		System.out.println();
-		for (int i=0;i<arg1.length;i++) {
-			System.out.print(arg1[i] + "--");
-		}
-		System.out.println();
-		
 		//get index of "Zillow Estimate"
 		int indexZ = 0;
 		for (indexZ=0;indexZ<npvCalTitle.length;indexZ++) {
@@ -705,19 +688,13 @@ class ContentComparator implements Comparator<String[]> {
 			if (npvCalTitle[indexT].equals("Today's Est. Price")) break;
 		}
 		double priceDiff0, priceDiff1;
-//		String zPriceStr = Formater.currencyToString(arg0[indexZ]);
-//		String tPriceStr = Formater.currencyToString(arg0[indexT]);
-		String zPriceStr = arg0[indexZ];
-		String tPriceStr = arg0[indexT];
-		System.out.println(zPriceStr + "-" + tPriceStr);
+		String zPriceStr = Formater.currencyToString(arg0[indexZ]);
+		String tPriceStr = Formater.currencyToString(arg0[indexT]);
 		priceDiff0 = Double.valueOf(zPriceStr)-Double.valueOf(tPriceStr);
 		priceDiff0 = Math.abs(priceDiff0);
 		
-//		zPriceStr = Formater.currencyToString(arg1[indexZ]);
-//		tPriceStr = Formater.currencyToString(arg1[indexT]);
-		zPriceStr = arg1[indexZ];
-		tPriceStr = arg1[indexT];
-		System.out.println(zPriceStr + "-" + tPriceStr);
+		zPriceStr = Formater.currencyToString(arg1[indexZ]);
+		tPriceStr = Formater.currencyToString(arg1[indexT]);
 		priceDiff1 = Double.valueOf(zPriceStr)-Double.valueOf(tPriceStr);
 		priceDiff1 = Math.abs(priceDiff1);
 		
@@ -725,8 +702,6 @@ class ContentComparator implements Comparator<String[]> {
 			return 1;
 		else 
 			return -1;
-		//else
-		//	return 0;
 	}
 	
 }
