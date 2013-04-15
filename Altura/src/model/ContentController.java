@@ -180,9 +180,11 @@ public class ContentController {
 							if (type.equalsIgnoreCase("SFR") && Math.abs(todayPrice/zillowPrice-1)>sfrGapThreshold) {
 								row.add(j, "N/A");
 								invalidRecord = true;
+								System.out.println(portfolioRow.get("Account") + " Our: " + todayPrice );
 							} else if (type.equalsIgnoreCase("Condo") && Math.abs(todayPrice/zillowPrice-1)>condoGapThreshold) {
 								row.add(j, "N/A");
 								invalidRecord = true;
+								System.out.println(portfolioRow.get("Account") + " Our: " + todayPrice );
 							} else {
 								row.add(j, Formater.toCurrency(todayPrice));
 //								row.add(j, String.valueOf(todayPrice));

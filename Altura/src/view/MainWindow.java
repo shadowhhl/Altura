@@ -416,9 +416,25 @@ public class MainWindow {
 						for (int i=0;i<tItems.length;i++) {
 							tItems[i].dispose();
 						}
-						for (int i=0;i<tableContents.size();i++) {
-							TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-							tItem.setText(tableContents.get(i));
+						
+						for (int i=0;i<=tableContents.size();i++) {
+							if (i>0) {
+								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+								tItem.setText(tableContents.get(i-1));
+							} else {
+								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+								Double zEstimate = 0.0, todayEstPrice = 0.0, projEstPrice = 0.0;
+								for (int ti=0;ti<tableContents.size();ti++) {
+									String[] tRow = tableContents.get(ti);
+									if (!tRow[6].equals("N/A")) zEstimate += Double.valueOf(Formater.currencyToString(tRow[6]));
+									if (!tRow[7].equals("N/A")) todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[7]));
+									if (!tRow[8].equals("N/A")) projEstPrice += Double.valueOf(Formater.currencyToString(tRow[8]));
+								}
+								String zEsStr = Formater.toCurrency(zEstimate.doubleValue());
+								String tEsStr = Formater.toCurrency(todayEstPrice.doubleValue());
+								String pEsStr = Formater.toCurrency(projEstPrice.doubleValue());
+								tItem.setText(new String[]{"Portfolio", "", "","","","", zEsStr, tEsStr, pEsStr});
+							}
 						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
@@ -468,31 +484,33 @@ public class MainWindow {
 						ContentController cc = new ContentController();
 //						System.out.println(portfolioTable.getSelectionIndex());
 						int selectionIndex = portfolioTable.getSelectionIndex();
-						TableItem row = portfolioTable.getItem(selectionIndex);
-						String accountNum = row.getText(0);
-						HashMap<String, String> selectedRow = arcPortfolio.getEntry(accountNum);
-//						System.out.println(selectedRow);
-						//HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
-						Integer numBedrooms = Integer.valueOf(selectedRow.get("#Bedrooms"));
-						Double dNum = Double.valueOf(selectedRow.get("#Bathrooms"));
-						Integer numBathrooms = dNum.intValue();
-						Double size = Double.valueOf(selectedRow.get("Size/SqFeet"));
-						String zipCode = selectedRow.get("Zip Code");
-						String type = selectedRow.get("Type");
-						String sqlStmt = null;
-						if (type.equalsIgnoreCase("SFR")) {
-							sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
-								numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_SFR);
-						} else {
-							sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
-									numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_CONDO);
+						if (selectionIndex!=0) {
+							TableItem row = portfolioTable.getItem(selectionIndex);
+							String accountNum = row.getText(0);
+							HashMap<String, String> selectedRow = arcPortfolio.getEntry(accountNum);
+	//						System.out.println(selectedRow);
+							//HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
+							Integer numBedrooms = Integer.valueOf(selectedRow.get("#Bedrooms"));
+							Double dNum = Double.valueOf(selectedRow.get("#Bathrooms"));
+							Integer numBathrooms = dNum.intValue();
+							Double size = Double.valueOf(selectedRow.get("Size/SqFeet"));
+							String zipCode = selectedRow.get("Zip Code");
+							String type = selectedRow.get("Type");
+							String sqlStmt = null;
+							if (type.equalsIgnoreCase("SFR")) {
+								sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+									numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_SFR);
+							} else {
+								sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+										numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_CONDO);
+							}
+							
+							ArrayList< HashMap<String, String> > comparableProperties = cc.getSqlResult(sqlStmt);
+							//System.out.println(comparableProperties);
+							LPList lpList = new LPList();
+							lpList.setListPriceData(comparableProperties);
+							lpList.open();
 						}
-						
-						ArrayList< HashMap<String, String> > comparableProperties = cc.getSqlResult(sqlStmt);
-						//System.out.println(comparableProperties);
-						LPList lpList = new LPList();
-						lpList.setListPriceData(comparableProperties);
-						lpList.open();
 					} catch (Exception exception) {
 						exception.printStackTrace();
 					}
