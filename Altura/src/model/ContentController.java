@@ -68,7 +68,7 @@ public class ContentController {
 			row.add(2, Formater.toCurrency(ourProjPrice.doubleValue()));
 			row.add(3, Formater.toCurrency(zEstimatePrice.doubleValue()));
 			String[] newRow = new String[row.size()];
-			System.out.println(row);
+//			System.out.println(row);
 			row.toArray(newRow);
 			contents.add(newRow);
 		}
@@ -77,6 +77,10 @@ public class ContentController {
 	
 	public ArrayList<String[]> getTableContent(int[] options, Object addObj) {
 		ArrayList<String[]> contents = new ArrayList<String[]>();
+		
+		Db db = new Db();
+		db.connect();
+		
 		switch(options[0]) {
 		case DISPLAY_UPDATE: {
 			switch (options[1]) {
@@ -113,33 +117,7 @@ public class ContentController {
 						case 1: {row.add(j, portfolioRow.get("Zip Code"));break;}
 						case 2: {row.add(j, portfolioRow.get("Street"));break;}
 						case 3: {row.add(j, portfolioRow.get("Type"));break;}
-						case 10: {
-							String appraiserFMVStr = portfolioRow.get("Appraiser FMV");
-							if (appraiserFMVStr==null) {
-								row.add(j, "N/A");
-							} else {
-								row.add(j, Formater.toCurrency(Double.valueOf(appraiserFMVStr)));
-							}
-							break;
-						}
-						case 11: {
-							String valueStr = portfolioRow.get("Value");
-							if (valueStr==null) {
-								row.add(j, "N/A");
-							} else {
-								row.add(j, Formater.toCurrency(Double.valueOf(valueStr)));
-							}
-							break;
-						}
-						case 12: {
-							String projRecStr = portfolioRow.get("Projected Recovery");
-							if (projRecStr==null) {
-								row.add(j, "N/A");
-							} else {
-								row.add(j, Formater.toCurrency(Double.valueOf(projRecStr)));
-							}
-							break;
-						}
+						
 						case 4: {
 							String projTimeline = portfolioRow.get("Projected Timeline");
 							if (projTimeline==null) {
@@ -237,11 +215,88 @@ public class ContentController {
 							}
 							break;
 						}
-						case 9: {
+						case 9: { //change in value
 							if (todayPrice==null || projPrice==null) {
 								row.add(j, "N/A");
 							} else {
 								row.add(j, Formater.toPercentage(projPrice/todayPrice));
+							}
+							break;
+						}
+						case 10: {  //Absorption rate
+							//Generate sql stmt
+							Calendar oneYearFromNow = now;
+							oneYearFromNow.add(Calendar.YEAR, -1);
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+							sdf.setCalendar(oneYearFromNow);
+							String nowStr = sdf.format(oneYearFromNow.getTime());
+							String sqlStmt = "";
+
+							int activeRecord=0, csRecord = 0;
+							if (type.equalsIgnoreCase("SFR")) {
+								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
+										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+										"' and mlx_STATUS='CS' and " +
+										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
+//								System.out.println(sqlStmt);
+								db.query(sqlStmt);
+								csRecord = db.getCount();
+								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
+										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+										"' and mlx_STATUS='A'";
+								db.query(sqlStmt);
+								activeRecord = db.getCount();
+							} else if (type.equalsIgnoreCase("Condo")) {
+								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
+										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+										"' and mlx_STATUS='CS' and " +
+										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
+//								System.out.println(sqlStmt);
+								db.query(sqlStmt);
+								csRecord = db.getCount();
+								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
+										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+										"' and mlx_STATUS='A'";
+								db.query(sqlStmt);
+								activeRecord = db.getCount();
+							}
+//							System.out.println("active: " + activeRecord + " cs: " + csRecord);
+							 
+							if (csRecord==0) {
+								row.add(j, "Inf");
+							} else {
+								row.add(j,Formater.toShortDouble((double)activeRecord/csRecord, 1));
+							}
+							break;
+						}
+						case 11: {
+							String appraiserFMVStr = portfolioRow.get("Appraiser FMV");
+							if (appraiserFMVStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(appraiserFMVStr)));
+							}
+							break;
+						}
+						case 12: {
+							String valueStr = portfolioRow.get("Value");
+							if (valueStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(valueStr)));
+							}
+							break;
+						}
+						case 13: {
+							String projRecStr = portfolioRow.get("Projected Recovery");
+							if (projRecStr==null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(Double.valueOf(projRecStr)));
 							}
 							break;
 						}
@@ -503,6 +558,7 @@ public class ContentController {
 			break;
 		}
 		}
+//		System.out.println(sqlStmt);
 		return sqlStmt;
 	}
 }

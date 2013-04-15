@@ -91,7 +91,7 @@ public class MainWindow {
 		tabFolder.setBounds(0, 0, tabFolderWidth, tabFolderHeight);
 		
 		for (int i=0;i<tabFolderNames.length;i++) {
-			if (tabFolderNames[i].equals("Sensitivity")) {
+			if (i==1 || i==2 || i==4 || i==5) {
 				continue;
 			}
 			TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
@@ -108,15 +108,15 @@ public class MainWindow {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		paramList.setParamValue(npvParamsNames[0], sdf.format(date));
 		//IRR (%)
-		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
+//		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
 		//Monthly IRR (%)
-		paramList.setParamValue(npvParamsNames[2], String.valueOf(100.0*(Math.pow(1+10.0/100.0, 1.0/12.0)-1.0)));
+//		paramList.setParamValue(npvParamsNames[2], String.valueOf(100.0*(Math.pow(1+10.0/100.0, 1.0/12.0)-1.0)));
 		//Inflation Rate (%)
-		paramList.setParamValue(npvParamsNames[3], String.valueOf(2.5));
+//		paramList.setParamValue(npvParamsNames[3], String.valueOf(2.5));
 		//Maintenance Costs (%)
-		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
+//		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
 		//Transaction Costs (%)
-		paramList.setParamValue(npvParamsNames[5], String.valueOf(7.0));
+//		paramList.setParamValue(npvParamsNames[5], String.valueOf(7.0));
 	}
 	
 	private void doCalculation() {
@@ -288,24 +288,17 @@ public class MainWindow {
 			buttonUpdate.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseDown(MouseEvent e) {
-//					System.out.println(paramList);
-//
-//					TableItem[] tItems =  statsNpvTable.getItems();
-//					
-//					ArrayList<String[]> updatedContent = new ArrayList<String[]>();
-//					ContentController cc = new ContentController();
-//					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
-//					for (int j=0;j<updatedContent.size();j++) {
-//						System.out.println(updatedContent.get(j));
-//						tItems[j].setText(updatedContent.get(j));
-//					}
-//					
-//					ArrayList<ArrayList<Double>> prices = new ArrayList<ArrayList<Double>>();
-//					ArrayList<Double> bestEstimate = new ArrayList<Double>();
-//					ArrayList<Double> ourPrice = new ArrayList<Double>();
-//					ArrayList<Double> zillowPrice = new ArrayList<Double>();
-//					
-//					//for (int j=0;j<upd)
+					System.out.println(paramList);
+
+					TableItem[] tItems =  statsNpvTable.getItems();
+					
+					ArrayList<String[]> updatedContent = new ArrayList<String[]>();
+					ContentController cc = new ContentController();
+					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
+					for (int j=0;j<updatedContent.size();j++) {
+						System.out.println(updatedContent.get(j));
+						tItems[j].setText(updatedContent.get(j));
+					}
 					
 				}
 			});
@@ -464,23 +457,37 @@ public class MainWindow {
 			portfolioTable = new Table(group, SWT.BORDER|SWT.FULL_SELECTION);
 			portfolioTable.setHeaderVisible(true);
 			portfolioTable.setLinesVisible(true);
-			portfolioTable.setBounds(0, 0, npvCalWidth, npvCalHeight);
+			portfolioTable.setBounds(10, 10, npvCalWidth, npvCalHeight);
 
 			portfolioTable.addListener(SWT.DefaultSelection, new Listener() {
 				
 				@Override
 				public void handleEvent(Event e) {
 					try {
+						
 						ContentController cc = new ContentController();
-						System.out.println(portfolioTable.getSelectionIndex());
+//						System.out.println(portfolioTable.getSelectionIndex());
 						int selectionIndex = portfolioTable.getSelectionIndex();
-						HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
+						TableItem row = portfolioTable.getItem(selectionIndex);
+						String accountNum = row.getText(0);
+						HashMap<String, String> selectedRow = arcPortfolio.getEntry(accountNum);
+//						System.out.println(selectedRow);
+						//HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
 						Integer numBedrooms = Integer.valueOf(selectedRow.get("#Bedrooms"));
-						Integer numBathrooms = Integer.valueOf(selectedRow.get("#Bathrooms"));
+						Double dNum = Double.valueOf(selectedRow.get("#Bathrooms"));
+						Integer numBathrooms = dNum.intValue();
 						Double size = Double.valueOf(selectedRow.get("Size/SqFeet"));
 						String zipCode = selectedRow.get("Zip Code");
-						String sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+						String type = selectedRow.get("Type");
+						String sqlStmt = null;
+						if (type.equalsIgnoreCase("SFR")) {
+							sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
 								numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_SFR);
+						} else {
+							sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+									numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_CONDO);
+						}
+						
 						ArrayList< HashMap<String, String> > comparableProperties = cc.getSqlResult(sqlStmt);
 						//System.out.println(comparableProperties);
 						LPList lpList = new LPList();

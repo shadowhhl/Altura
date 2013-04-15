@@ -46,6 +46,17 @@ public class Db {
 		return resultSet;
 	}
 	
+	public int getCount() {
+		try {
+			resultSet.first();
+			return resultSet.getInt("count(*)");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
 	public ArrayList< HashMap<String, String> > parseResult() {
 		resultList = new ArrayList<HashMap<String,String>>();
 		try {

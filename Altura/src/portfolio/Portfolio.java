@@ -205,4 +205,14 @@ public class Portfolio {
 	public String toString() {
 		return "Portfolio [portfolio=" + portfolio + "]";
 	}
+
+	public HashMap<String, String> getEntry(String accountNum) {
+		for (int i=0;i<portfolio.size();i++) {
+			HashMap<String, String> row = portfolio.get(i);
+			if (row.get("Account").equalsIgnoreCase(accountNum)) {
+				return row;
+			}
+		}
+		return null;
+	}
 }

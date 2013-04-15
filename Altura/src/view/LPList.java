@@ -93,7 +93,7 @@ public class LPList {
 			url = new URL(imageURL);
 			Display imgDisplay = Display.getDefault();
 			Image image = new Image(imgDisplay, url.openStream());
-			System.out.println(url);
+//			System.out.println(url);
 			composite.setBounds(0, 0, image.getImageData().width, image.getImageData().height);
 			composite.setBackgroundImage(image);
 			shell.pack();
@@ -162,6 +162,6 @@ public class LPList {
 			
 			this.propertyList.add(newProperty);
 		}
-		System.out.println(this.propertyList);
+//		System.out.println(this.propertyList);
 	}
 }
