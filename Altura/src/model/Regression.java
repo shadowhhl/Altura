@@ -25,6 +25,7 @@ public class Regression{
 	public static final String condo_a_CoeffFileName = "r_condo_a.txt";
 	public static final String sfr_cs_CoeffFileName = "r_sfr_cs.txt";
 	public static final String sfr_a_CoeffFileName = "r_sfr_a.txt";
+	public static final String logisticFileName = "r_logistic.txt";
 	
 	public double R2;
 	private HashMap<String, Double> condo_cs_Coefficients = new HashMap<String, Double>();
@@ -36,6 +37,8 @@ public class Regression{
 	public static final int CONDO_A_COEFF_INDEX=1;
 	public static final int SFR_CS_COEFF_INDEX=2;
 	public static final int SFR_A_COEFF_INDEX=3;
+	
+	public double[] logisticRegressionCoeff; 
 	
 	private void parseR2() {
 		try {
@@ -72,65 +75,89 @@ public class Regression{
 		}
 	}
 	
-	private void parseCoefficients(int index) {
-		try {
-			String fileName = "";
-			switch (index) {
-			case CONDO_CS_COEFF_INDEX:
-				fileName = absoluteDirName + condo_cs_CoeffFileName;
-				break;
-			case CONDO_A_COEFF_INDEX:
-				fileName = absoluteDirName + condo_a_CoeffFileName;
-				break;
-			case SFR_CS_COEFF_INDEX:
-				fileName = absoluteDirName + sfr_cs_CoeffFileName;
-				break;
-			case SFR_A_COEFF_INDEX:
-				fileName = absoluteDirName + sfr_a_CoeffFileName;
-				break;
-			}
-			
-			//skip the first line
-			BufferedReader resultReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
-			
-			//skip the first line
-			String line = new String();
-			line = resultReader.readLine();
-			HashMap<String, Double> coeff = new HashMap<String, Double>();
-			while ((line = resultReader.readLine())!=null) {
-				String[] lineSplit = line.split(" ");
-				String key = lineSplit[0];
-				String value = lineSplit[1];
-				key = key.replace("\"", "");
-				if (value.equals("NA")) {
-					coeff.put(key, null);
-				} else {
-					coeff.put(key, Double.valueOf(value));
+	private void parseCoefficients(int index) {		
+		if (index==CONDO_CS_COEFF_INDEX || 
+			index==CONDO_A_COEFF_INDEX || 
+			index==SFR_CS_COEFF_INDEX || 
+			index==SFR_A_COEFF_INDEX) {
+			try {
+				String fileName = "";
+				switch (index) {
+				case CONDO_CS_COEFF_INDEX:
+					fileName = absoluteDirName + condo_cs_CoeffFileName;
+					break;
+				case CONDO_A_COEFF_INDEX:
+					fileName = absoluteDirName + condo_a_CoeffFileName;
+					break;
+				case SFR_CS_COEFF_INDEX:
+					fileName = absoluteDirName + sfr_cs_CoeffFileName;
+					break;
+				case SFR_A_COEFF_INDEX:
+					fileName = absoluteDirName + sfr_a_CoeffFileName;
+					break;
 				}
+				
+				//skip the first line
+				BufferedReader resultReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+				
+				//skip the first line
+				String line = new String();
+				line = resultReader.readLine();
+				HashMap<String, Double> coeff = new HashMap<String, Double>();
+				while ((line = resultReader.readLine())!=null) {
+					String[] lineSplit = line.split(" ");
+					String key = lineSplit[0];
+					String value = lineSplit[1];
+					key = key.replace("\"", "");
+					if (value.equals("NA")) {
+						coeff.put(key, null);
+					} else {
+						coeff.put(key, Double.valueOf(value));
+					}
+				}
+				resultReader.close();
+				
+				switch (index) {
+				case CONDO_CS_COEFF_INDEX:
+					condo_cs_Coefficients = coeff;
+					break;
+				case CONDO_A_COEFF_INDEX:
+					condo_a_Coefficients = coeff;
+					break;
+				case SFR_CS_COEFF_INDEX:
+					sfr_cs_Coefficients = coeff;
+					break;
+				case SFR_A_COEFF_INDEX:
+					sfr_a_Coefficients = coeff;
+					break;
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			resultReader.close();
-			
-			switch (index) {
-			case CONDO_CS_COEFF_INDEX:
-				condo_cs_Coefficients = coeff;
-				break;
-			case CONDO_A_COEFF_INDEX:
-				condo_a_Coefficients = coeff;
-				break;
-			case SFR_CS_COEFF_INDEX:
-				sfr_cs_Coefficients = coeff;
-				break;
-			case SFR_A_COEFF_INDEX:
-				sfr_a_Coefficients = coeff;
-				break;
+		} 
+		else { //parse logistic regression 
+			try {
+				String fileName = absoluteDirName + logisticFileName;
+				BufferedReader resultReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+				
+				//read coefficients
+				double constCoeff = 0.0;
+				double priceCoeff = -1.0;
+				double timeCoeff = 1.0;
+				//
+				logisticRegressionCoeff = new double[3];
+				logisticRegressionCoeff[0]=constCoeff;
+				logisticRegressionCoeff[1]=priceCoeff;
+				logisticRegressionCoeff[2]=timeCoeff;
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
-	public Double predict(int index, int numBedrms, double numBathrms, int age, double lotSize, double currentIndex, String zipCode) {
+	public Double predictPropertyPrice(int index, int numBedrms, double numBathrms, int age, double lotSize, double currentIndex, String zipCode) {
 		HashMap<String, Double> coeff = new HashMap<String, Double>();
 		Double predictPrice = 0.0;
 		//when doing prediction, leave out zipcode is not in the hashmap, while zipcodes with NA values return null
@@ -232,5 +259,12 @@ public class Regression{
 		parseR2();
 		return p;
 		
+	}
+
+	public double getLogisticProb(double price, double time) {
+		double expTerm = Math.exp(logisticRegressionCoeff[0]+
+								  logisticRegressionCoeff[1]*price+
+								  logisticRegressionCoeff[2]*time);
+		return expTerm/(1.0+expTerm);
 	}
 }

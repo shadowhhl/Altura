@@ -15,11 +15,15 @@ import portfolio.*;
 
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import JSci.maths.FourierMath;
 
 public class MainWindow {
 
@@ -91,7 +95,7 @@ public class MainWindow {
 		tabFolder.setBounds(0, 0, tabFolderWidth, tabFolderHeight);
 		
 		for (int i=0;i<tabFolderNames.length;i++) {
-			if (i==1 || i==2 || i==4 || i==5) {
+			if (i==1 || i==2 || i==4 || i==5 || i==6) {
 				continue;
 			}
 			TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
@@ -143,8 +147,11 @@ public class MainWindow {
 								  userguideGroupControlHeights[i]);
 				
 				Label lblNewLabel = new Label(grpText, SWT.NONE);
-				lblNewLabel.setBounds(0, 0, userguideGroupControlWidth, userguideGroupControlHeights[i]);
+				lblNewLabel.setBounds(5, 10, userguideGroupControlWidth, userguideGroupControlHeights[i]);
 				lblNewLabel.setText(userguideSessions[i]);
+				Display display = Display.getDefault();
+				Font lblFont = new Font(display, "Lucida", 12, java.awt.Font.PLAIN);
+				lblNewLabel.setFont(lblFont);
 			}
 			break;
 		}
@@ -212,6 +219,21 @@ public class MainWindow {
 //		}
 //		break;
 		case 5: { //creating the statistical model page
+			Composite composite = new Composite(tabFolder, SWT.NONE);
+			tbtmItem.setControl(composite);
+			
+			for (int i=0;i<statsGroupControlNames.length;i++) {
+				Group group = new Group(composite, SWT.NONE);
+				group.setText(statsGroupControlNames[i]);
+				group.setBounds(statsGroupControlX, 
+						  		statsGroupControlYs[i], 
+						  		statsGroupControlWidth,
+						  		statsGroupControlHeights[i]);
+				createStatsGroup(group, i);
+			}
+			break;
+		}
+		case 6: { //creating the dynamic pricing page
 			Composite composite = new Composite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(composite);
 			
@@ -428,12 +450,12 @@ public class MainWindow {
 									String[] tRow = tableContents.get(ti);
 									if (!tRow[6].equals("N/A")) zEstimate += Double.valueOf(Formater.currencyToString(tRow[6]));
 									if (!tRow[7].equals("N/A")) todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[7]));
-									if (!tRow[8].equals("N/A")) projEstPrice += Double.valueOf(Formater.currencyToString(tRow[8]));
+									//if (!tRow[8].equals("N/A")) projEstPrice += Double.valueOf(Formater.currencyToString(tRow[8]));
 								}
 								String zEsStr = Formater.toCurrency(zEstimate.doubleValue());
 								String tEsStr = Formater.toCurrency(todayEstPrice.doubleValue());
-								String pEsStr = Formater.toCurrency(projEstPrice.doubleValue());
-								tItem.setText(new String[]{"Portfolio", "", "","","","", zEsStr, tEsStr, pEsStr});
+								//String pEsStr = Formater.toCurrency(projEstPrice.doubleValue());
+								tItem.setText(new String[]{"Portfolio", "", "","","","", zEsStr, tEsStr});
 							}
 						}
 					} catch (Exception e1) {
@@ -507,8 +529,8 @@ public class MainWindow {
 							
 							ArrayList< HashMap<String, String> > comparableProperties = cc.getSqlResult(sqlStmt);
 							//System.out.println(comparableProperties);
-							LPList lpList = new LPList();
-							lpList.setListPriceData(comparableProperties);
+							PricePlotWindow lpList = new PricePlotWindow();
+							lpList.setPriceData(comparableProperties);
 							lpList.open();
 						}
 					} catch (Exception exception) {

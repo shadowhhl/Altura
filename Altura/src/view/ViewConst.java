@@ -3,7 +3,7 @@ package view;
 public class ViewConst {
 	public static final int mainWindowWidth = 1000;
 	public static final int mainWindowHeight = 700;
-	public static final String[] tabFolderNames = {"User Guide", "Output(1)", "Output(2)", "Portfolio NPV", "Sensitivity", "Statistical Model"};
+	public static final String[] tabFolderNames = {"User Guide", "Output(1)", "Output(2)", "Portfolio NPV", "Sensitivity", "Statistical Model", "Dynamic Pricing"};
 	
 	public static final int comboWidthOffset = 22;
 	
@@ -20,30 +20,19 @@ public class ViewConst {
 	public static final int[] userguideGroupControlYs = {10, 150, 360};
 	
 
-	public static final String[] userguideGroupControlNames = {"Tabs", "Calculation of NPV", "Missing information"};
+	public static final String[] userguideGroupControlNames = {"General Information", "Methodology", "Input and Output"};
 	public static final String[] userguideSessions = {
 		//The first session
-		"*Four tabs are following this one.\n" +
-			"*The first one is the \"Output\" page where a summary is shown\n" +
-			"*The second one is the \"Portfolio NPV\" where the NPV of all assets are calculated upon the assumptions that are described in Parameters.\n" +
-			"*The third one is the \"Sensitivity\" where we show the impact on the on the NPV if we change: the IRR, the horizon period, the change in " +
-			"value of the property \nover time or the rental increase in %.\n" +
-			"*The fourth one is the \"Statistical Model\" where we show our estimates of properties fair market value by statistical analysis.",
+		"*This tool enables users to estimate the market value of perperties in the ARC's portfolio via a regression model.\n",
+			
 		//The second session
-			"*The formula is based upon: the sale price of the property, the rental income over the period, the maintenance costs and the transactions costs.\n" +
-		"*The sale price of the property is calculated as follow: Appraiser FMV*(1+change in price over the horizon period)/((1+IRR)^(horizon period)).\n" +
-		"*The rental income over the period formulat uses a rental base income calculated as a percentage of the Appraiser FMV (for example 10%) and an expected \nincrease in this rental income per year (for example 5%). \n" +
-		"*Then I have implemented the formula we have seen in Advance Engineering to obtain the NPV of a geometric gradient serie.\n" +
-		"*The transactions costs are calculated using a percentage of the sale price at the end of the horizon period (here I used 8%): \nAppraiser FMV*(1+change in price over the period)*8%/((1+IRR)^Horizon period)\n" +
-		"*For the maintenance costs, I used the same formula as the rental income. The base maintenance costs are calculated as a % of the Appraiser FMV (I used 3%) \nand they increased each year by the % of inflation (4,5%).\n" +
-		"*Then I have implemented the formula we have seen in Advance Engineering to obtain the NPV of a geometric gradient serie.",
+			"*Historical transaction records are downloaded from MLS and cleaned, then imported to a MySQL database.\n" +
+		"*Records of ARC's portfolio are cleaned and kept in a CSV file.\n" +
+		"*The \"Portfolio value\" tab shows the estimates of properties in ARC's portfolio. Only properties with completed information are included.\n" +
+		"*For each property, the estimate from Zillow, i.e. the ZEstimate, the estimate from our model, and the difference between these two estimates are shown.\n",
 		//The third session
-		"*We don't have the Appraiser FMV for all the property\n" +
-		"*Horizon period for all properties are missing\n" +
-		"*Expected rental incomes per year or as a percentage of the value of the property are missing\n" +
-		"*We don't know what is the projectec increase in these rental incomes\n" +
-		"*Maintenance costs and transaction costs used as % here are indicative value but we should work on it\n" +
-		"*Inflation rate: 4,5%, I am not sure if it is the \"right\" number to use"
+		"*A log-linear regression model is applied to estimate the market value of each property.\n" +
+		"*In the regression model, the dependent variables is the \"total price\", and independent variables include \"number of bedrooms\",\n\"number of bathrooms\", \"size of the property\", \"zip code\" (as dummy variables), and \"Case Shiller Index\"\n"
 		};
 
 	//Output(1) & (2) pages
@@ -138,7 +127,7 @@ public class ViewConst {
 	public static final String[] estimationMethods = {"Regression"};
 	
 	//Portfolio NPV page
-	public static final String[] npvGroupControlNames = {"Parameters", "Statistical Market Analysis", "NPV Calculation"};
+	public static final String[] npvGroupControlNames = {"Parameters", "Statistical Market Analysis", "Market Value Estimates"};
 	public static final int[] npvGroupControlHeights = {60,85,400};
 	public static final int npvGroupControlWidth = 940;
 	public static final int npvGroupControlX = 20;
@@ -162,8 +151,8 @@ public class ViewConst {
 //												"Sell it now", "Hold and sell later"};
 	public static final String[] npvCalTitle = {"Loan Account", "Zip Code", 
 												"Street", "Type", "Projected Timeline", "Lot Size", 
-												"Zillow Estimate", "Today's Est. Price", "Proj. Timeline Est. Price",
-												"Change in Value", "Absorption Rate", "Appraiser FMV", "Value", "Projected Recovery"};
+												"Zillow Estimate", "Today's Est. Price", //"Proj. Timeline Est. Price",
+												"Difference in Value", "Absorption Rate", "Appraiser FMV", "Value", "Projected Recovery"};
 	public static final int npvCalWidth = 910;
 	public static final int npvCalHeight = 360;
 	public static final int npvCalColumnWidth = 100;

@@ -144,7 +144,6 @@ public class ContentController {
 							} else {
 								zillowPrice = Double.valueOf(zEstimateStr);
 								row.add(j, Formater.toCurrency(zillowPrice));
-//								row.add(j, zEstimateStr);
 							}
 							break;
 						}
@@ -152,23 +151,21 @@ public class ContentController {
 							Double indexValue = index.getIndex(now);
 							Double priceCS, priceA;
 							if (type.equalsIgnoreCase("SFR")) {
-								priceCS = regression.predict(Regression.SFR_CS_COEFF_INDEX, numBedrms, numBathrms, 
+								priceCS = regression.predictPropertyPrice(Regression.SFR_CS_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
-								priceA = regression.predict(Regression.SFR_A_COEFF_INDEX, numBedrms, numBathrms, 
+								priceA = regression.predictPropertyPrice(Regression.SFR_A_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
 							} else if (type.equalsIgnoreCase("Condo")) { //type==Code
-								priceCS = regression.predict(Regression.CONDO_CS_COEFF_INDEX, numBedrms, numBathrms, 
+								priceCS = regression.predictPropertyPrice(Regression.CONDO_CS_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
-								priceA = regression.predict(Regression.CONDO_A_COEFF_INDEX, numBedrms, numBathrms, 
+								priceA = regression.predictPropertyPrice(Regression.CONDO_A_COEFF_INDEX, numBedrms, numBathrms, 
 										age, lotSize, indexValue.doubleValue(), zipCode);
 							} else {
 								priceCS = null;
 								priceA = null;
 							}
 							if (priceA!=null && priceCS!=null) {
-								double csDiff = Math.abs(priceCS/zillowPrice-1);
-								double aDiff = Math.abs(priceA/zillowPrice-1);
-								todayPrice = (csDiff<aDiff) ? priceCS : priceA;
+								todayPrice = priceCS;
 							} else if (priceA==null && priceCS != null) {
 								todayPrice = priceCS;
 							} else if (priceA != null && priceCS == null) {
@@ -177,55 +174,18 @@ public class ContentController {
 								todayPrice =zillowPrice;
 							}
 							
-							if (type.equalsIgnoreCase("SFR") && Math.abs(todayPrice/zillowPrice-1)>sfrGapThreshold) {
+							row.add(j, Formater.toCurrency(todayPrice));
+							break;
+						}
+						case 8: { //change in value
+							if (todayPrice==null || zillowPrice==null) {
 								row.add(j, "N/A");
-								invalidRecord = true;
-								System.out.println(portfolioRow.get("Account") + " Our: " + todayPrice );
-							} else if (type.equalsIgnoreCase("Condo") && Math.abs(todayPrice/zillowPrice-1)>condoGapThreshold) {
-								row.add(j, "N/A");
-								invalidRecord = true;
-								System.out.println(portfolioRow.get("Account") + " Our: " + todayPrice );
 							} else {
-								row.add(j, Formater.toCurrency(todayPrice));
-//								row.add(j, String.valueOf(todayPrice));
+								row.add(j, Formater.toPercentage((todayPrice-zillowPrice)/zillowPrice));
 							}
 							break;
 						}
-						case 8: { //projected price
-							try {
-								Calendar projTime = Calendar.getInstance();
-								String projTimeStr = portfolioRow.get("Projected Timeline");
-								projTime.setTime(new SimpleDateFormat("M-d-yyyy").parse(projTimeStr));
-								Double indexValue = index.getIndex(projTime);
-								
-								if (type.equalsIgnoreCase("SFR")) {
-									projPrice = regression.predict(Regression.SFR_CS_COEFF_INDEX, numBedrms, numBathrms, 
-																	age, lotSize, indexValue.doubleValue(), zipCode);
-								} else {
-									projPrice = regression.predict(Regression.CONDO_CS_COEFF_INDEX, numBedrms, numBathrms, 
-											age, lotSize, indexValue.doubleValue(), zipCode);
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							
-							if (projPrice==null) {
-								row.add(j, "N/A");
-							} else {
-								row.add(j, Formater.toCurrency(projPrice));
-//								row.add(j, String.valueOf(projPrice));
-							}
-							break;
-						}
-						case 9: { //change in value
-							if (todayPrice==null || projPrice==null) {
-								row.add(j, "N/A");
-							} else {
-								row.add(j, Formater.toPercentage(projPrice/todayPrice));
-							}
-							break;
-						}
-						case 10: {  //Absorption rate
+						case 9: {  //Absorption rate
 							//Generate sql stmt
 							Calendar oneYearFromNow = now;
 							oneYearFromNow.add(Calendar.YEAR, -1);
@@ -241,32 +201,37 @@ public class ContentController {
 										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
 										"' and mlx_STATUS='CS' and " +
 										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
-//								System.out.println(sqlStmt);
+								System.out.println(sqlStmt);
 								db.query(sqlStmt);
 								csRecord = db.getCount();
+								
 								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
 										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
 										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
 										"' and mlx_STATUS='A'";
 								db.query(sqlStmt);
+								System.out.println(sqlStmt);
 								activeRecord = db.getCount();
+								
 							} else if (type.equalsIgnoreCase("Condo")) {
 								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
 										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
 										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
 										"' and mlx_STATUS='CS' and " +
 										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
-//								System.out.println(sqlStmt);
+								System.out.println(sqlStmt);
 								db.query(sqlStmt);
 								csRecord = db.getCount();
+								
 								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
 										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
 										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
 										"' and mlx_STATUS='A'";
+								System.out.println(sqlStmt);
 								db.query(sqlStmt);
 								activeRecord = db.getCount();
 							}
-//							System.out.println("active: " + activeRecord + " cs: " + csRecord);
+							System.out.println("active: " + activeRecord + " cs: " + csRecord);
 							 
 							if (csRecord==0) {
 								row.add(j, "Inf");
@@ -275,7 +240,7 @@ public class ContentController {
 							}
 							break;
 						}
-						case 11: {
+						case 10: {
 							String appraiserFMVStr = portfolioRow.get("Appraiser FMV");
 							if (appraiserFMVStr==null) {
 								row.add(j, "N/A");
@@ -284,7 +249,7 @@ public class ContentController {
 							}
 							break;
 						}
-						case 12: {
+						case 11: {
 							String valueStr = portfolioRow.get("Value");
 							if (valueStr==null) {
 								row.add(j, "N/A");
@@ -293,7 +258,7 @@ public class ContentController {
 							}
 							break;
 						}
-						case 13: {
+						case 12: {
 							String projRecStr = portfolioRow.get("Projected Recovery");
 							if (projRecStr==null) {
 								row.add(j, "N/A");
@@ -518,7 +483,7 @@ public class ContentController {
 			Calendar now = Calendar.getInstance();
 			for (int i=0;i<sqlResult.size();i++) {
 				Calendar listDate = Calendar.getInstance();
-				listDate.setTime(new SimpleDateFormat("M/d/yyyy").parse(sqlResult.get(i).get("mlx_LD")));
+				listDate.setTime(new SimpleDateFormat("M/d/yyyy").parse(sqlResult.get(i).get("mlx_CD")));
 				long millisDiff = now.getTimeInMillis() - listDate.getTimeInMillis();
 				Double dayDiff = millisDiff/1000.0/3600.0/24.0;
 				if (dayDiff<=365) {
@@ -536,24 +501,25 @@ public class ContentController {
 		
 		switch (option) {
 		case 0: { //
-			Double sizeHigh = size*1.5;
-			Double sizeLow = size*0.5;
 			if (propertyType== PROPERTY_TYPE_SFR)
-				sqlStmt = "select mlx_LPdollar, mlx_LD, mlx_LA from MLX_SFR_data where mlx_BEDSsharp=" + numBedrooms.toString() +
+				sqlStmt = "select mlx_SPdollar, mlx_CD, mlx_LA from MLX_SFR_data where mlx_BEDSsharp=" + numBedrooms.toString() +
 						" and mlx_FBsharp= " + numBathrooms.toString() + 
-						" and mlx_LA > " + sizeLow.toString() +
-						" and mlx_LA < " + sizeHigh.toString() + 
+						//" and mlx_LA > " + sizeLow.toString() +
+						//" and mlx_LA < " + sizeHigh.toString() + 
 						" and mlx_ZIP= " + zipCode + 
 						" and mlx_STATUS='CS'" +
-						" and mlx_LPdollar <> ''";
+						" and mlx_SPdollar <> ''" +
+						" and mlx_LA <> ''";
 			else if (propertyType == PROPERTY_TYPE_CONDO)
-				sqlStmt = "select mlx_LPdollar, mlx_LD, mlx_LA from MLX_CONDO_data where mlx_BEDSsharp=" + numBedrooms.toString() +
+				sqlStmt = "select mlx_SPdollar, mlx_CD, mlx_LA from MLX_CONDO_data where mlx_BEDSsharp=" + numBedrooms.toString() +
 				" and mlx_FBsharp= " + numBathrooms.toString() + 
-				" and mlx_LA > " + sizeLow.toString() +
-				" and mlx_LA < " + sizeHigh.toString() + 
+				//" and mlx_LA > " + sizeLow.toString() +
+				//" and mlx_LA < " + sizeHigh.toString() + 
 				" and mlx_ZIP= " + zipCode +
 				" and mlx_STATUS='CS'" +
-				" and mlx_LPdollar <> ''";
+				" and mlx_SPdollar <> ''" +
+				" and mlx_LA <> ''";
+			System.out.println(sqlStmt);
 			break;
 		}
 		default: {
