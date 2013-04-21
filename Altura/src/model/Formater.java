@@ -38,6 +38,14 @@ public class Formater {
 		
 	}
 	
+	static public String toCurrency(Double d) {
+		if (d.isNaN()) {
+			return "NaN";
+		} else {
+			return toCurrency(d.doubleValue());
+		}
+	}
+	
 	static public String currencyToString(String c) {
 		String t = c;
 		t = t.replace("$", "");

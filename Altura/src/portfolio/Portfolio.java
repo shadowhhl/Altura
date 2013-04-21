@@ -9,11 +9,14 @@ import data.*;
 
 public class Portfolio {
 	private ArrayList< HashMap<String, String> > portfolio;
+	private String portfolioFileName = "input_good.csv";
+	//private String portfolioFileName = "input_all.csv";
+	
 	
 	public void initialPortfolio() {
 		Csv csvReader = new Csv();
-		String[] title = csvReader.readTitleFromCsv("input.csv");
-		ArrayList<String[]> content = csvReader.readValueFromCsv("input.csv");
+		String[] title = csvReader.readTitleFromCsv(portfolioFileName);
+		ArrayList<String[]> content = csvReader.readValueFromCsv(portfolioFileName);
 		
 		portfolio = new ArrayList< HashMap<String,String> >();
 		

@@ -128,13 +128,13 @@ public class ViewConst {
 	
 	//Portfolio NPV page
 	public static final String[] npvGroupControlNames = {"Parameters", "Statistical Market Analysis", "Market Value Estimates"};
-	public static final int[] npvGroupControlHeights = {60,85,400};
+	public static final int[] npvGroupControlHeights = {180,90,250};
 	public static final int npvGroupControlWidth = 940;
 	public static final int npvGroupControlX = 20;
-	public static final int[] npvGroupControlYs = {10, 90, 195};
+	public static final int[] npvGroupControlYs = {10, 210, 325};
 	
-	//public static final String[] npvParamsNames = {"Today's date", "IRR (%)", "Monthly IRR (%)", "Inflation Rate (%)", "Maintenance Costs (%)", "Transaction Costs (%)"};
-	public static final String[] npvParamsNames = {"Today's date"};
+	public static final String[] npvParamsNames = {"Today's date", "IRR (%)", "Monthly IRR (%)", "Maintenance Costs (%)", "Transaction Costs (%)", "Tax (%)"};
+	//public static final String[] npvParamsNames = {"Today's date"};
 	public static final boolean[] npvParamsEditable = {false, true, false, true, true, true};
 	public static final int npvParamLabelWidth = 200;
 	public static final int npvParamTextWidth = 100;
@@ -145,17 +145,13 @@ public class ViewConst {
 	public static final int npvStatsTextWidth = 100;
 	public static final int npvStatsHeight = 20;
 	
-//	public static final String[] npvCalTitle1 = {"ARC Portfolio", "Address", "Values of the property given by ARC", 
-//												"Characteristics of the Property", "Our estimated prices",
-//												"Management of the Property", "Rent it and sell it later", 
-//												"Sell it now", "Hold and sell later"};
 	public static final String[] npvCalTitle = {"Loan Account", "Zip Code", 
-												"Street", "Type", "Projected Timeline", "Lot Size", 
-												"Zillow Estimate", "Today's Est. Price", //"Proj. Timeline Est. Price",
-												"Difference in Value", "Absorption Rate", "Appraiser FMV", "Value", "Projected Recovery"};
+												"Street", "Type", "Square Footage", "# of Bedrooms", "# of Bathrooms",
+												"Zillow Estimate", "Today's Est. Price", "Difference in Value", 
+												"NPV Value", "Projected Timeline", "Absorption Rate"};
 	public static final int npvCalWidth = 910;
-	public static final int npvCalHeight = 360;
-	public static final int npvCalColumnWidth = 100;
+	public static final int npvCalHeight = 210;
+	public static final int npvCalColumnWidth = 80;
 	
 	//Sensitivity page
 	public static final String[] senGroupControlNames = {"Parameters", "NPV Estimates"};

@@ -64,7 +64,6 @@ public class Regression{
 	}
 
 	public void regression() {
-		ArrayList<String> rCommands = new ArrayList<String>();
 		R r = new R();
 		Thread t1 = new Thread(r);
 		t1.run();

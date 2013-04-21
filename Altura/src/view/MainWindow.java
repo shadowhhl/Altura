@@ -40,9 +40,11 @@ public class MainWindow {
 	private Button npvUpdateButton;
 	private int currentSelectedLoanIndex = 0;
 	
-	private ParamList paramList;
+	public static ParamList paramList;
 	
 	public Portfolio arcPortfolio;
+	
+	private Text squareFootageConst; 
 	
 	/**
 	 * Launch the application.
@@ -82,7 +84,7 @@ public class MainWindow {
 	protected void createContents() {
 		initialPortfolio();
 		doCalculation();
-		initialParams();
+		initialParamList();
 		
 		shell = new Shell(SWT.CLOSE);
 		shell.setSize(mainWindowWidth, mainWindowHeight);
@@ -105,22 +107,22 @@ public class MainWindow {
 		
 	}
 	
-	private void initialParams() {
+	private void initialParamList() {
 		paramList = new ParamList();
 		//today's date
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		paramList.setParamValue(npvParamsNames[0], sdf.format(date));
 		//IRR (%)
-//		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
+		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
 		//Monthly IRR (%)
-//		paramList.setParamValue(npvParamsNames[2], String.valueOf(100.0*(Math.pow(1+10.0/100.0, 1.0/12.0)-1.0)));
-		//Inflation Rate (%)
-//		paramList.setParamValue(npvParamsNames[3], String.valueOf(2.5));
+		paramList.setParamValue(npvParamsNames[2], String.valueOf(10.0/12.0));
 		//Maintenance Costs (%)
-//		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
+		paramList.setParamValue(npvParamsNames[3], String.valueOf(7.0));
 		//Transaction Costs (%)
-//		paramList.setParamValue(npvParamsNames[5], String.valueOf(7.0));
+		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
+		//Tax Costs (%)
+		paramList.setParamValue(npvParamsNames[5], String.valueOf(30.0));
 	}
 	
 	private void doCalculation() {
@@ -310,7 +312,7 @@ public class MainWindow {
 			buttonUpdate.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseDown(MouseEvent e) {
-					System.out.println(paramList);
+					//System.out.println(paramList);
 
 					TableItem[] tItems =  statsNpvTable.getItems();
 					
@@ -318,7 +320,7 @@ public class MainWindow {
 					ContentController cc = new ContentController();
 					updatedContent = cc.getUpdateStatsNpvTableContent(arcPortfolio, currentSelectedLoanIndex, paramList);
 					for (int j=0;j<updatedContent.size();j++) {
-						System.out.println(updatedContent.get(j));
+						//System.out.println(updatedContent.get(j));
 						tItems[j].setText(updatedContent.get(j));
 					}
 					
@@ -445,17 +447,34 @@ public class MainWindow {
 								tItem.setText(tableContents.get(i-1));
 							} else {
 								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-								Double zEstimate = 0.0, todayEstPrice = 0.0, projEstPrice = 0.0;
+								int zEstColIndex=0, todayEstColIndex=0, npvValueColIndex=0;
+								for (int index=0;index<npvCalTitle.length;index++) {
+									if (npvCalTitle[index].equalsIgnoreCase("Zillow Estimate")) zEstColIndex=index;
+									if (npvCalTitle[index].equalsIgnoreCase("Today's Est. Price")) todayEstColIndex=index;
+									if (npvCalTitle[index].equalsIgnoreCase("NPV Value")) npvValueColIndex=index;
+								}
+								Double zEstimate = 0.0, todayEstPrice = 0.0, npvValue=0.0;
 								for (int ti=0;ti<tableContents.size();ti++) {
 									String[] tRow = tableContents.get(ti);
-									if (!tRow[6].equals("N/A")) zEstimate += Double.valueOf(Formater.currencyToString(tRow[6]));
-									if (!tRow[7].equals("N/A")) todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[7]));
-									//if (!tRow[8].equals("N/A")) projEstPrice += Double.valueOf(Formater.currencyToString(tRow[8]));
+									if (!tRow[zEstColIndex].equals("N/A")) 
+										zEstimate += Double.valueOf(Formater.currencyToString(tRow[zEstColIndex]));
+									if (!tRow[todayEstColIndex].equals("N/A")) 
+										todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[todayEstColIndex]));
+									if (!tRow[npvValueColIndex].equals("N/A")) 
+										npvValue += Double.valueOf(Formater.currencyToString(tRow[npvValueColIndex]));
 								}
-								String zEsStr = Formater.toCurrency(zEstimate.doubleValue());
-								String tEsStr = Formater.toCurrency(todayEstPrice.doubleValue());
-								//String pEsStr = Formater.toCurrency(projEstPrice.doubleValue());
-								tItem.setText(new String[]{"Portfolio", "", "","","","", zEsStr, tEsStr});
+								String zEsStr = Formater.toCurrency(zEstimate);
+								String tEsStr = Formater.toCurrency(todayEstPrice);
+								String npvValStr = Formater.toCurrency(npvValue);
+								String[] firstLine = new String[npvCalTitle.length];
+								for (int index=0;index<npvCalTitle.length;index++) {
+									if (index==0) firstLine[index]="Portfolio";
+									else if (index==zEstColIndex) firstLine[index]=zEsStr;
+									else if (index==todayEstColIndex) firstLine[index]=tEsStr;
+									else if (index==npvValueColIndex) firstLine[index]=npvValStr;
+									else firstLine[index]="";
+								}
+								tItem.setText(firstLine);
 							}
 						}
 					} catch (Exception e1) {
@@ -472,20 +491,63 @@ public class MainWindow {
 			npvUpdateButton.addMouseListener(listener);
 			npvUpdateButton.setText(updateString);
 			npvUpdateButton.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
+			
+			Label vLabel = new Label(group, SWT.NONE);
+			vLabel.setBounds(350, 10, 150, 20);
+			vLabel.setText("NPV Valuation Base");
+			
+			final Combo valueSelection = new Combo(group, SWT.BORDER);
+			valueSelection.setBounds(500, 10, 150, 30);
+			valueSelection.add("Zillow Price");
+			valueSelection.add("Altura Price");
+			valueSelection.select(0);
+			paramList.setParamValue("Value Option", "zillow");
+			valueSelection.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					// TODO Auto-generated method stub
+					int valueOption = valueSelection.getSelectionIndex();
+					if (valueOption==0) {
+						paramList.setParamValue("Value Option", "zillow");
+					} else {
+						paramList.setParamValue("Value Option", "altura");
+					}
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			
 			break;
 		}
 		case 1: {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_STATS};
 			defaultContent = cc.getParamContent(displayOptions, null);
+			
 			for (int i=0;i<npvStatsNames.length;i++) {
 				Label label = new Label(group, SWT.NONE);
-				Text text = new Text(group, SWT.NONE);
+				
 				label.setBounds(10, i*(npvStatsHeight+5)+10, npvStatsLabelWidth, npvStatsHeight);
 				label.setText(npvStatsNames[i]);
-				text.setBounds(npvStatsLabelWidth+20, i*(npvStatsHeight+5)+10, npvStatsTextWidth, npvStatsHeight);
-				text.setText(defaultContent.get(i));
-				text.setEditable(false);
-				text.setBackground(getColor(SWT.COLOR_GRAY));
+				
+				if (i==1) { //square footage constraint
+					squareFootageConst = new Text(group, SWT.NONE);
+					squareFootageConst.setBounds(npvStatsLabelWidth+20, i*(npvStatsHeight+5)+10, npvStatsTextWidth, npvStatsHeight);
+					squareFootageConst.setText(defaultContent.get(i));
+					squareFootageConst.setEditable(true);
+					squareFootageConst.setBackground(getColor(SWT.COLOR_WHITE));
+					
+				} else {
+					Text text = new Text(group, SWT.NONE);
+					text.setBounds(npvStatsLabelWidth+20, i*(npvStatsHeight+5)+10, npvStatsTextWidth, npvStatsHeight);
+					text.setText(defaultContent.get(i));
+					text.setEditable(false);
+					text.setBackground(getColor(SWT.COLOR_GRAY));
+				}
 			}
 			break;
 		}
@@ -504,33 +566,43 @@ public class MainWindow {
 					try {
 						
 						ContentController cc = new ContentController();
-//						System.out.println(portfolioTable.getSelectionIndex());
 						int selectionIndex = portfolioTable.getSelectionIndex();
 						if (selectionIndex!=0) {
+							//get row in the table
 							TableItem row = portfolioTable.getItem(selectionIndex);
+							//get loan account
 							String accountNum = row.getText(0);
+							//get property
 							HashMap<String, String> selectedRow = arcPortfolio.getEntry(accountNum);
-	//						System.out.println(selectedRow);
-							//HashMap<String, String> selectedRow = arcPortfolio.getEntry(selectionIndex);
+							//get size constraint constraint
+							Double sizeConst = Double.valueOf(squareFootageConst.getText()) / 100.0;
+							
 							Integer numBedrooms = Integer.valueOf(selectedRow.get("#Bedrooms"));
 							Double dNum = Double.valueOf(selectedRow.get("#Bathrooms"));
 							Integer numBathrooms = dNum.intValue();
 							Double size = Double.valueOf(selectedRow.get("Size/SqFeet"));
 							String zipCode = selectedRow.get("Zip Code");
 							String type = selectedRow.get("Type");
-							String sqlStmt = null;
+							String closedSqlStmt = null, activeSqlStmt = null;
+							
 							if (type.equalsIgnoreCase("SFR")) {
-								sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
-									numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_SFR);
+								closedSqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+									numBedrooms, numBathrooms, size, sizeConst, zipCode, ContentController.PROPERTY_TYPE_SFR);
+								activeSqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_AONLY, 
+										numBedrooms, numBathrooms, size, sizeConst, zipCode, ContentController.PROPERTY_TYPE_SFR);
 							} else {
-								sqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
-										numBedrooms, numBathrooms, size, zipCode, ContentController.PROPERTY_TYPE_CONDO);
+								closedSqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_CSONLY, 
+										numBedrooms, numBathrooms, size, sizeConst, zipCode, ContentController.PROPERTY_TYPE_CONDO);
+								activeSqlStmt = cc.sqlGenerator(ContentController.SQL_COMPARABLE_LIST_AONLY, 
+										numBedrooms, numBathrooms, size, sizeConst, zipCode, ContentController.PROPERTY_TYPE_CONDO);
 							}
 							
-							ArrayList< HashMap<String, String> > comparableProperties = cc.getSqlResult(sqlStmt);
-							//System.out.println(comparableProperties);
+							ArrayList< HashMap<String, String> > comparableClosedProperties = cc.getSqlResult(closedSqlStmt);
+							ArrayList< HashMap<String, String> > comparableActiveProperties = cc.getSqlResult(activeSqlStmt);
+							
 							PricePlotWindow lpList = new PricePlotWindow();
-							lpList.setPriceData(comparableProperties);
+							lpList.setClosedPriceData(comparableClosedProperties);
+							lpList.setActivePriceData(comparableActiveProperties);
 							lpList.open();
 						}
 					} catch (Exception exception) {
