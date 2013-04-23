@@ -184,20 +184,19 @@ public class ContentController {
 							NpvAnalyzer npvAnalyzer = new NpvAnalyzer();
 							ParamList tParams = MainWindow.paramList;
 							String waccStr = tParams.getParam(ViewConst.npvParamsNames[1]);
+							Double wacc = Double.valueOf(waccStr);
+							Double mWacc = wacc / 12.0;
 							
-							String mWaccStr = tParams.getParam(ViewConst.npvParamsNames[2]);
-							Double mWacc = Double.valueOf(mWaccStr);
-							
-							String mCostStr = tParams.getParam(ViewConst.npvParamsNames[3]);
+							String mCostStr = tParams.getParam(ViewConst.npvParamsNames[2]);
 							Double mCost = Double.valueOf(mCostStr);
 							
-							String transCostStr = tParams.getParam(ViewConst.npvParamsNames[4]);
+							String transCostStr = tParams.getParam(ViewConst.npvParamsNames[3]);
 							Double transCost = Double.valueOf(transCostStr);
 							
-							String taxStr = tParams.getParam(ViewConst.npvParamsNames[5]);
+							String taxStr = tParams.getParam(ViewConst.npvParamsNames[4]);
 							Double tax = Double.valueOf(taxStr);
 							
-							String rentalGrowthStr = tParams.getParam(ViewConst.npvParamsNames[6]);
+							String rentalGrowthStr = tParams.getParam(ViewConst.npvParamsNames[5]);
 							Double rentalGrowth = Double.valueOf(rentalGrowthStr);
 							
 							npvAnalyzer.setmWaccPercentage(mWacc);
@@ -499,8 +498,6 @@ public class ContentController {
 				contents.add(sdf.format(date));
 				//WACC
 				contents.add("10.0");
-				//Monthly WACC
-				contents.add(Formater.toShortDouble(10.0/12.0,2));
 				//Maintenance Costs
 				contents.add("7.0");
 				//Transaction Costs
@@ -526,9 +523,6 @@ public class ContentController {
 				contents.add(null);
 				//WACC
 				contents.add("10");
-				//Monthly WACC
-				double mWacc = 10.0/12.0;
-				contents.add(Formater.toShortDouble(mWacc,2));
 				//Maintenance Cost annual
 				contents.add("8");
 				//Maintenance Costs

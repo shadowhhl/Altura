@@ -1,77 +1,6 @@
 package view;
 
-import static view.ViewConst.comboWidthOffset;
-import static view.ViewConst.getNPVTableColNum;
-import static view.ViewConst.getNPVTableTitle;
-import static view.ViewConst.getNPVTableTitleWidth;
-import static view.ViewConst.getNPVTableTitleX;
-import static view.ViewConst.getNPVTableTitleY;
-import static view.ViewConst.getStatsTableTitleX;
-import static view.ViewConst.mainWindowHeight;
-import static view.ViewConst.mainWindowWidth;
-import static view.ViewConst.npvCalColumnWidth;
-import static view.ViewConst.npvCalHeight;
-import static view.ViewConst.npvCalTitle;
-import static view.ViewConst.npvCalWidth;
-import static view.ViewConst.npvGroupControlHeights;
-import static view.ViewConst.npvGroupControlNames;
-import static view.ViewConst.npvGroupControlWidth;
-import static view.ViewConst.npvGroupControlX;
-import static view.ViewConst.npvGroupControlYs;
-import static view.ViewConst.npvParamHeight;
-import static view.ViewConst.npvParamLabelWidth;
-import static view.ViewConst.npvParamTextWidth;
-import static view.ViewConst.npvParamsEditable;
-import static view.ViewConst.npvParamsNames;
-import static view.ViewConst.npvStatsHeight;
-import static view.ViewConst.npvStatsLabelWidth;
-import static view.ViewConst.npvStatsNames;
-import static view.ViewConst.npvStatsTextWidth;
-import static view.ViewConst.outputGroupControlHeights;
-import static view.ViewConst.outputGroupControlNames;
-import static view.ViewConst.outputGroupControlWidth;
-import static view.ViewConst.outputGroupControlX;
-import static view.ViewConst.outputGroupControlYs;
-import static view.ViewConst.outputNPVTableHeight;
-import static view.ViewConst.outputNPVTableTitleHeights;
-import static view.ViewConst.outputNPVTableTitleRowNum;
-import static view.ViewConst.outputNPVTableTitleWidths_0;
-import static view.ViewConst.outputNPVTableXOffset;
-import static view.ViewConst.outputStatsTableHeight;
-import static view.ViewConst.outputStatsTableTitleHeight;
-import static view.ViewConst.outputStatsTableTitles;
-import static view.ViewConst.outputStatsTableWidths;
-import static view.ViewConst.outputStatsTableXOffset;
-import static view.ViewConst.statsGroupControlHeights;
-import static view.ViewConst.statsGroupControlNames;
-import static view.ViewConst.statsGroupControlWidth;
-import static view.ViewConst.statsGroupControlX;
-import static view.ViewConst.statsGroupControlYs;
-import static view.ViewConst.statsNpvGroupControlHeights;
-import static view.ViewConst.statsNpvGroupControlWidths;
-import static view.ViewConst.statsNpvGroupControlXs;
-import static view.ViewConst.statsNpvGroupControlYs;
-import static view.ViewConst.statsNpvTableColumnWidth;
-import static view.ViewConst.statsNpvTableHeight;
-import static view.ViewConst.statsNpvTableNames;
-import static view.ViewConst.statsNpvTableWidth;
-import static view.ViewConst.statsParamHeight;
-import static view.ViewConst.statsParamLabelWidth;
-import static view.ViewConst.statsParamTextWidth;
-import static view.ViewConst.statsParamsEditable;
-import static view.ViewConst.statsParamsNames;
-import static view.ViewConst.tabFolderNames;
-import static view.ViewConst.updateButtonHeight;
-import static view.ViewConst.updateButtonWidth;
-import static view.ViewConst.updateButtonX;
-import static view.ViewConst.updateButtonY;
-import static view.ViewConst.updateString;
-import static view.ViewConst.userguideGroupControlHeights;
-import static view.ViewConst.userguideGroupControlNames;
-import static view.ViewConst.userguideGroupControlWidth;
-import static view.ViewConst.userguideGroupControlX;
-import static view.ViewConst.userguideGroupControlYs;
-import static view.ViewConst.userguideSessions;
+import static view.ViewConst.*;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -176,7 +105,6 @@ public class MainWindow {
 	 */
 	protected void createContents() {
 		initialPortfolio();
-		doCalculation();
 		initialParamList();
 		
 		shell = new Shell(SWT.CLOSE);
@@ -190,7 +118,7 @@ public class MainWindow {
 		tabFolder.setBounds(0, 0, tabFolderWidth, tabFolderHeight);
 		
 		for (int i=0;i<tabFolderNames.length;i++) {
-			if (i==1 || i==2 || i==4 || i==5 || i==6) {
+			if (i==2 || i==4 || i==5 || i==6) {
 				continue;
 			}
 			TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
@@ -208,28 +136,16 @@ public class MainWindow {
 		paramList.setParamValue(npvParamsNames[0], sdf.format(date));
 		//WACC (%)
 		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
-		//Monthly WACC (%)
-		paramList.setParamValue(npvParamsNames[2], String.valueOf(10.0/12.0));
 		//Maintenance Costs (%)
-		paramList.setParamValue(npvParamsNames[3], String.valueOf(7.0));
+		paramList.setParamValue(npvParamsNames[2], String.valueOf(7.0));
 		//Transaction Costs (%)
-		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
+		paramList.setParamValue(npvParamsNames[3], String.valueOf(8.0));
 		//Tax Costs (%)
-		paramList.setParamValue(npvParamsNames[5], String.valueOf(30.0));
+		paramList.setParamValue(npvParamsNames[4], String.valueOf(30.0));
 		//Annual Rental Growth Rate (%)
-		paramList.setParamValue(npvParamsNames[6], String.valueOf(4.0));
+		paramList.setParamValue(npvParamsNames[5], String.valueOf(4.0));
 	}
 	
-	private void doCalculation() {
-		//Read from database
-		
-		//Statistical Model
-		
-		//Npv Price
-		
-		
-	}
-
 	private void createTabItem(TabFolder tabFolder, TabItem tbtmItem, int tabIndex) {
 		switch (tabIndex) {
 		case 0: { //creating the user guide page
@@ -244,44 +160,34 @@ public class MainWindow {
 								  userguideGroupControlHeights[i]);
 				
 				Label lblNewLabel = new Label(grpText, SWT.NONE);
-				lblNewLabel.setBounds(5, 5, userguideGroupControlWidth, userguideGroupControlHeights[i]);
+				lblNewLabel.setBounds(10, 5, userguideGroupControlWidth, userguideGroupControlHeights[i]);
 				lblNewLabel.setText(userguideSessions[i]);
 				Display display = Display.getDefault();
 				Font lblFont = new Font(display, "Lucida", 12, java.awt.Font.PLAIN);
 				lblNewLabel.setFont(lblFont);
 				
-				if (i==userguideGroupControlNames.length-1) {
-					Composite imgComposite = new Composite(grpText, SWT.NONE);
-					Display imgDisplay = Display.getDefault();
-					ImageData fcImageData = new ImageData("FlowChartForUser.jpg");
-					fcImageData = fcImageData.scaledTo(850, 510);
-					Image flowChartImage = new Image(imgDisplay, fcImageData);
-					imgComposite.setBounds(40, 0, fcImageData.width, fcImageData.height);
-					imgComposite.setBackgroundImage(flowChartImage);
-				}
 			}
 			break;
 		}
 		case 1: { //creating the output(1) page
-			ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.NONE);
-			tbtmItem.setControl(scrolledComposite);
-			scrolledComposite.setExpandHorizontal(true);
-			scrolledComposite.setExpandVertical(true);
+			Composite composite = new Composite(tabFolder, SWT.NONE);
+			tbtmItem.setControl(composite);
+			Group grpText = new Group(composite, SWT.NONE);
+			grpText.setText("Information Flow");
+			grpText.setBounds(userguideGroupControlX, 
+							  userguideGroupControlYs[0], 
+							  userguideGroupControlWidth,
+							  800);
+			Composite imgComposite = new Composite(grpText, SWT.NONE);
+			Display imgDisplay = Display.getDefault();
+			Image fcImage = new Image(imgDisplay, "okok.jpg");
+			//ImageData fcImageData = new ImageData("okok.jpg");
+			//Image flowChartImage = new Image(imgDisplay, fcImageData);
+			//imgComposite.setBounds(30, 20, fcImageData.width, fcImageData.height);
+			imgComposite.setBounds(30, 20, fcImage.getImageData().width, fcImage.getImageData().height);
+			//imgComposite.setBackgroundImage(flowChartImage);
+			imgComposite.setBackgroundImage(fcImage);
 			
-			Composite composite = new Composite(scrolledComposite, SWT.NONE);
-			
-			for (int i=0;i<outputGroupControlNames.length-1;i++) {
-				Group group = new Group(composite, SWT.NONE);
-				group.setText(outputGroupControlNames[i]);
-				group.setBounds(outputGroupControlX, 
-						  		outputGroupControlYs[i], 
-						  		outputGroupControlWidth,
-						  		outputGroupControlHeights[i]);
-				createOutputGroup(group, i);
-			}
-			
-			scrolledComposite.setContent(composite);
-			scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			break;
 		}
 		case 2: { //creating the output(2) page
@@ -310,21 +216,6 @@ public class MainWindow {
 			}
 			break;
 		}
-//		case 4: { //creating the sensitivity page
-//			Composite composite = new Composite(tabFolder, SWT.NONE);
-//			tbtmItem.setControl(composite);
-//			
-//			for (int i=0;i<senGroupControlNames.length;i++) {
-//				Group group = new Group(composite, SWT.NONE);
-//				group.setText(senGroupControlNames[i]);
-//				group.setBounds(senGroupControlX, 
-//						  		senGroupControlYs[i], 
-//						  		senGroupControlWidth,
-//						  		senGroupControlHeights[i]);
-//				createSenGroup(group, i);
-//			}
-//		}
-//		break;
 		case 5: { //creating the statistical model page
 			Composite composite = new Composite(tabFolder, SWT.NONE);
 			tbtmItem.setControl(composite);
@@ -478,6 +369,10 @@ public class MainWindow {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_PARAMS};
 			defaultContent = cc.getParamContent(displayOptions, null);
 			for (int i=0;i<npvParamsNames.length;i++) {
+				Label explanLabel = new Label(group, SWT.NONE);
+				explanLabel.setBounds(350, i*(npvParamHeight+5)+10, 600, npvParamHeight);
+				explanLabel.setText(npvParamExplanation[i]);
+				
 				Label label = new Label(group, SWT.NONE);
 				final Text text = new Text(group, SWT.NONE);
 				label.setBounds(10, i*(npvParamHeight+5)+10, npvParamLabelWidth, npvParamHeight);
@@ -495,24 +390,6 @@ public class MainWindow {
 						try {
 							String key = (String)text.getData("id");
 							paramList.setParamValue(key, text.getText());
-							if (key.equals("WACC (%)")) {
-								String waccStr = text.getText();
-								Double wacc = Double.valueOf(waccStr);
-								Double monthWacc = 100.0*(Math.pow(1+wacc/100.0, 1.0/12.0)-1.0);
-								paramList.setParamValue("Monthly WACC (%)", monthWacc.toString());
-								
-								Control[] controls = text.getParent().getChildren();
-								for (int i=0;i<controls.length;i++) {
-									String names = (String)controls[i].getData("id");
-									if (names!=null) {
-										if (names.equals("Monthly WACC (%)")) {
-											Text tmpText = (Text)controls[i];
-											
-											tmpText.setText(Formater.toShortDouble(monthWacc.doubleValue(), 2));
-										}
-									}
-								}
-							}
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -520,7 +397,7 @@ public class MainWindow {
 				});
 			}
 			npvUpdateButton = new Button(group, SWT.BORDER);
-			MouseListener listener = new MouseListener() {
+			MouseListener updateListener = new MouseListener() {
 				
 				@Override
 				public void mouseUp(MouseEvent arg0) {
@@ -530,7 +407,74 @@ public class MainWindow {
 				
 				@Override
 				public void mouseDown(MouseEvent arg0) {
+					try {
+						//get items from table
+						TableItem[] tItems = portfolioTable.getItems();
+						
+						ContentController cc = new ContentController();
+						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
+						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
+						
+						Comparator<String[]> contentComparator = new ContentComparator();			
+						Collections.sort(tableContents, contentComparator);
+						
+						for (int i=0;i<tItems.length;i++) {
+							tItems[i].dispose();
+						}
+						
+						for (int i=0;i<=tableContents.size();i++) {
+							if (i>0) {
+								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+								tItem.setText(tableContents.get(i-1));
+							} else {
+								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+								int zEstColIndex=0, todayEstColIndex=0, npvValueColIndex=0;
+								for (int index=0;index<npvCalTitle.length;index++) {
+									if (npvCalTitle[index].equalsIgnoreCase("Zillow Estimate")) zEstColIndex=index;
+									if (npvCalTitle[index].equalsIgnoreCase("Today's Est. Price")) todayEstColIndex=index;
+									if (npvCalTitle[index].equalsIgnoreCase("NPV Value")) npvValueColIndex=index;
+								}
+								Double zEstimate = 0.0, todayEstPrice = 0.0, npvValue=0.0;
+								for (int ti=0;ti<tableContents.size();ti++) {
+									String[] tRow = tableContents.get(ti);
+									if (!tRow[zEstColIndex].equals("N/A")) 
+										zEstimate += Double.valueOf(Formater.currencyToString(tRow[zEstColIndex]));
+									if (!tRow[todayEstColIndex].equals("N/A")) 
+										todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[todayEstColIndex]));
+									if (!tRow[npvValueColIndex].equals("N/A")) 
+										npvValue += Double.valueOf(Formater.currencyToString(tRow[npvValueColIndex]));
+								}
+								String zEsStr = Formater.toCurrency(zEstimate);
+								String tEsStr = Formater.toCurrency(todayEstPrice);
+								String npvValStr = Formater.toCurrency(npvValue);
+								String[] firstLine = new String[npvCalTitle.length];
+								for (int index=0;index<npvCalTitle.length;index++) {
+									if (index==0) firstLine[index]="Portfolio";
+									else if (index==zEstColIndex) firstLine[index]=zEsStr;
+									else if (index==todayEstColIndex) firstLine[index]=tEsStr;
+									else if (index==npvValueColIndex) firstLine[index]=npvValStr;
+									else firstLine[index]="";
+								}
+								tItem.setText(firstLine);
+							}
+						}
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			
+				@Override
+				public void mouseDoubleClick(MouseEvent arg0) {
 					// TODO Auto-generated method stub
+					
+				}
+			};
+			npvUpdateButton.addMouseListener(new MouseListener() {
+				
+				@Override
+				public void mouseUp(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
 					try {
 						//get items from table
 						TableItem[] tItems = portfolioTable.getItems();
@@ -588,21 +532,85 @@ public class MainWindow {
 				}
 				
 				@Override
+				public void mouseDown(MouseEvent arg0) {
+					System.out.println("Down");
+//					try {
+//						//get items from table
+//						TableItem[] tItems = portfolioTable.getItems();
+//						
+//						ContentController cc = new ContentController();
+//						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
+//						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
+//						
+//						Comparator<String[]> contentComparator = new ContentComparator();			
+//						Collections.sort(tableContents, contentComparator);
+//						
+//						for (int i=0;i<tItems.length;i++) {
+//							tItems[i].dispose();
+//						}
+//						
+//						for (int i=0;i<=tableContents.size();i++) {
+//							if (i>0) {
+//								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+//								tItem.setText(tableContents.get(i-1));
+//							} else {
+//								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
+//								int zEstColIndex=0, todayEstColIndex=0, npvValueColIndex=0;
+//								for (int index=0;index<npvCalTitle.length;index++) {
+//									if (npvCalTitle[index].equalsIgnoreCase("Zillow Estimate")) zEstColIndex=index;
+//									if (npvCalTitle[index].equalsIgnoreCase("Today's Est. Price")) todayEstColIndex=index;
+//									if (npvCalTitle[index].equalsIgnoreCase("NPV Value")) npvValueColIndex=index;
+//								}
+//								Double zEstimate = 0.0, todayEstPrice = 0.0, npvValue=0.0;
+//								for (int ti=0;ti<tableContents.size();ti++) {
+//									String[] tRow = tableContents.get(ti);
+//									if (!tRow[zEstColIndex].equals("N/A")) 
+//										zEstimate += Double.valueOf(Formater.currencyToString(tRow[zEstColIndex]));
+//									if (!tRow[todayEstColIndex].equals("N/A")) 
+//										todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[todayEstColIndex]));
+//									if (!tRow[npvValueColIndex].equals("N/A")) 
+//										npvValue += Double.valueOf(Formater.currencyToString(tRow[npvValueColIndex]));
+//								}
+//								String zEsStr = Formater.toCurrency(zEstimate);
+//								String tEsStr = Formater.toCurrency(todayEstPrice);
+//								String npvValStr = Formater.toCurrency(npvValue);
+//								String[] firstLine = new String[npvCalTitle.length];
+//								for (int index=0;index<npvCalTitle.length;index++) {
+//									if (index==0) firstLine[index]="Portfolio";
+//									else if (index==zEstColIndex) firstLine[index]=zEsStr;
+//									else if (index==todayEstColIndex) firstLine[index]=tEsStr;
+//									else if (index==npvValueColIndex) firstLine[index]=npvValStr;
+//									else firstLine[index]="";
+//								}
+//								tItem.setText(firstLine);
+//							}
+//						}
+//					} catch (Exception e1) {
+//						e1.printStackTrace();
+//					}
+					
+				}
+				
+				@Override
 				public void mouseDoubleClick(MouseEvent arg0) {
 					// TODO Auto-generated method stub
 					
 				}
-			};
-			npvUpdateButton.addMouseListener(listener);
+			});
+			//npvUpdateButton.addMouseListener(updateListener);
 			npvUpdateButton.setText(updateString);
 			npvUpdateButton.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
 			
 			Label vLabel = new Label(group, SWT.NONE);
-			vLabel.setBounds(350, 10, 150, 20);
-			vLabel.setText("NPV Valuation Base");
+			vLabel.setBounds(10, 6*(npvParamHeight+5)+10, npvParamLabelWidth, npvParamHeight);
+			vLabel.setText("Choice of Projected Sales Price?");
+			
+			Label vExplanLabel = new Label(group, SWT.NONE);
+			vExplanLabel.setBounds(350, 6*(npvParamHeight+5)+10, 600, npvParamHeight);
+			vExplanLabel.setText(npvParamExplanation[6]);
 			
 			final Combo valueSelection = new Combo(group, SWT.BORDER);
-			valueSelection.setBounds(500, 10, 150, 30);
+			valueSelection.setBounds(npvParamLabelWidth+19, 6*(npvParamHeight+5)+7, 120, 30);
 			valueSelection.add("Zillow Price");
 			valueSelection.add("Altura Price");
 			valueSelection.select(0);

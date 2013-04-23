@@ -2,8 +2,8 @@ package view;
 
 public class ViewConst {
 	public static final int mainWindowWidth = 1000;
-	public static final int mainWindowHeight = 750;
-	public static final String[] tabFolderNames = {"User Guide", "Output(1)", "Output(2)", "Portfolio NPV", "Sensitivity", "Statistical Model", "Dynamic Pricing"};
+	public static final int mainWindowHeight = 680;
+	public static final String[] tabFolderNames = {"User Guide", "Information Flow", "Output(2)", "Portfolio NPV", "Sensitivity", "Statistical Model", "Dynamic Pricing"};
 	
 	public static final int comboWidthOffset = 22;
 	
@@ -15,16 +15,16 @@ public class ViewConst {
 	
 	//User Guide page
 	public static final int userguideGroupControlWidth = 940;
-	public static final int[] userguideGroupControlHeights = {60, 80, 530};
+	public static final int[] userguideGroupControlHeights = {80, 180, 240};
 	public static final int userguideGroupControlX = 20;
-	public static final int[] userguideGroupControlYs = {10, 75, 160};
+	public static final int[] userguideGroupControlYs = {10, 105, 300};
 	
 
-	public static final String[] userguideGroupControlNames = {"General Information", "Require Input and Assumptions", "Information Flow"};
+	public static final String[] userguideGroupControlNames = {"General Information", "Require Input", "Assumptions"};//, "Information Flow"};
 	public static final String[] userguideSessions = {
 		//The first session
-		"*This tool is designed to dynamically valuate assets in a portfolio of real estate properties with objective " +
-		"of making decisions \nthat maximize the return of overall portfolio.\n",
+		"* This tool is designed to dynamically value assets in a portfolio of real estate properties with the objective" +
+		"  of making decisions that\n maximizes the return of the overall portfolio.\n",
 			
 		//The second session
 //			"*Historical transaction records are downloaded from MLS and cleaned, then imported to a MySQL database.\n" +
@@ -32,12 +32,19 @@ public class ViewConst {
 //		"*The \"Portfolio value\" tab shows the estimates of properties in ARC's portfolio. Only properties with completed information are included.\n" +
 //		"*For each property, the estimate from Zillow, i.e. the ZEstimate, the estimate from our model, and the difference between these two estimates are shown.\n",
 		//The third session
-		"",
-		"*A log-linear regression model is applied to estimate the market value of each property.\n" +
-		"*In the regression model, the dependent variables is the \"total price\", and independent variables include \"number of bedrooms\",\n\"number of bathrooms\", \"size of the property\", \"zip code\" (as dummy variables), and \"Case Shiller Index\"\n", 
+		"* Annual Weighted Average Cost of Capital (Annual WACC), maintenance costs, transaction costs, tax costs," +
+		"  and annual rental growth rate\n should be specified by the user; otherwise, the default values are used in the calculation.\n" +
+		"* The Zestimate of sales price and rental should be updated manually.\n" +
+		"* User may update the MLS database in order to have the most recent estimates; otherwise, only properties which" +
+		"  are listed in the market\n or closed sales prior to April 2013 are included.\n",
 		
-		//The forth session
-		""
+		"* Transaction costs form a fixed portion of the transaction income. For rental transactions, ARC pays a commission of 1.5 times" +
+		"  of the monthly\n income; and for sales transaction, ARC pays a commission of 7% of total selling price (both figures provided by ARC).\n" +
+		"* Maintenance costs (carrying cost) are incurred as long as ARC is holding the property, regardless of its rental status. This is fixed at 8% of\n rental income.\n" +
+		"* Tax payments are incurred at the time of sale.\n" +
+		"* Contracts are signed at when the decision is taken, with all transaction costs paid then. Transaction costs and tax payments are" +
+		"  one-time\n payments, while maintenance costs are paid monthly throughout the holding period.\n" +
+		"* Annual rent increases are fixed as a percentage which is set manually by the user."
 	};
 
 	//Output(1) & (2) pages
@@ -138,9 +145,16 @@ public class ViewConst {
 	public static final int npvGroupControlX = 20;
 	public static final int[] npvGroupControlYs = {10, 235, 345};
 	
-	public static final String[] npvParamsNames = {"Today's date", "WACC (%)", "Monthly WACC (%)", "Maintenance Costs (%)", "Transaction Costs (%)", "Tax (%)", "Annual Rental Growth Rate (%)"};
+	public static final String[] npvParamsNames = {"Today's date", "WACC (%)",  "Maintenance Costs (%)", "Transaction Costs (%)", "Tax (%)", "Annual Rental Growth Rate (%)"};
 	//public static final String[] npvParamsNames = {"Today's date"};
-	public static final boolean[] npvParamsEditable = {false, true, false, true, true, true, true};
+	public static final boolean[] npvParamsEditable = {false, true, true, true, true, true};
+	public static final String[] npvParamExplanation = {"", 
+														"The annual Weighted Average Cost of Capital.",
+														"The maintenance cost of a property as a percentage of its sales price.",
+														"The transaction cost of a property as a percentage of its sales price.",
+														"The tax cost of a property as a percentage of its sales price.",
+														"The annual rental growth rate.",
+														"The estimate of projected sales prices."};
 	public static final int npvParamLabelWidth = 200;
 	public static final int npvParamTextWidth = 100;
 	public static final int npvParamHeight = 20;
