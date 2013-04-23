@@ -162,9 +162,9 @@ public class MainWindow {
 				Label lblNewLabel = new Label(grpText, SWT.NONE);
 				lblNewLabel.setBounds(10, 5, userguideGroupControlWidth, userguideGroupControlHeights[i]);
 				lblNewLabel.setText(userguideSessions[i]);
-				Display display = Display.getDefault();
-				Font lblFont = new Font(display, "Lucida", 12, java.awt.Font.PLAIN);
-				lblNewLabel.setFont(lblFont);
+//				Display display = Display.getDefault();
+//				Font lblFont = new Font(display, "Lucida", 12, java.awt.Font.PLAIN);
+//				lblNewLabel.setFont(lblFont);
 				
 			}
 			break;
@@ -369,9 +369,11 @@ public class MainWindow {
 			int[] displayOptions = {ContentController.DISPLAY_DEFAULT, ContentController.DISPLAY_NPV_PARAMS};
 			defaultContent = cc.getParamContent(displayOptions, null);
 			for (int i=0;i<npvParamsNames.length;i++) {
-				Label explanLabel = new Label(group, SWT.NONE);
-				explanLabel.setBounds(350, i*(npvParamHeight+5)+10, 600, npvParamHeight);
-				explanLabel.setText(npvParamExplanation[i]);
+				if (i!=0) {
+					Label explanLabel = new Label(group, SWT.NONE);
+					explanLabel.setBounds(350, i*(npvParamHeight+5)+10, 600, npvParamHeight);
+					explanLabel.setText(npvParamExplanation[i]);
+				}
 				
 				Label label = new Label(group, SWT.NONE);
 				final Text text = new Text(group, SWT.NONE);
@@ -400,13 +402,13 @@ public class MainWindow {
 			MouseListener updateListener = new MouseListener() {
 				
 				@Override
-				public void mouseUp(MouseEvent arg0) {
+				public void mouseDown(MouseEvent arg0) {
 					// TODO Auto-generated method stub
 					
 				}
 				
 				@Override
-				public void mouseDown(MouseEvent arg0) {
+				public void mouseUp(MouseEvent arg0) {
 					try {
 						//get items from table
 						TableItem[] tItems = portfolioTable.getItems();
@@ -465,139 +467,10 @@ public class MainWindow {
 			
 				@Override
 				public void mouseDoubleClick(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
 				}
 			};
-			npvUpdateButton.addMouseListener(new MouseListener() {
-				
-				@Override
-				public void mouseUp(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-					try {
-						//get items from table
-						TableItem[] tItems = portfolioTable.getItems();
-						
-						ContentController cc = new ContentController();
-						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
-						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
-						
-						Comparator<String[]> contentComparator = new ContentComparator();			
-						Collections.sort(tableContents, contentComparator);
-						
-						for (int i=0;i<tItems.length;i++) {
-							tItems[i].dispose();
-						}
-						
-						for (int i=0;i<=tableContents.size();i++) {
-							if (i>0) {
-								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-								tItem.setText(tableContents.get(i-1));
-							} else {
-								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-								int zEstColIndex=0, todayEstColIndex=0, npvValueColIndex=0;
-								for (int index=0;index<npvCalTitle.length;index++) {
-									if (npvCalTitle[index].equalsIgnoreCase("Zillow Estimate")) zEstColIndex=index;
-									if (npvCalTitle[index].equalsIgnoreCase("Today's Est. Price")) todayEstColIndex=index;
-									if (npvCalTitle[index].equalsIgnoreCase("NPV Value")) npvValueColIndex=index;
-								}
-								Double zEstimate = 0.0, todayEstPrice = 0.0, npvValue=0.0;
-								for (int ti=0;ti<tableContents.size();ti++) {
-									String[] tRow = tableContents.get(ti);
-									if (!tRow[zEstColIndex].equals("N/A")) 
-										zEstimate += Double.valueOf(Formater.currencyToString(tRow[zEstColIndex]));
-									if (!tRow[todayEstColIndex].equals("N/A")) 
-										todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[todayEstColIndex]));
-									if (!tRow[npvValueColIndex].equals("N/A")) 
-										npvValue += Double.valueOf(Formater.currencyToString(tRow[npvValueColIndex]));
-								}
-								String zEsStr = Formater.toCurrency(zEstimate);
-								String tEsStr = Formater.toCurrency(todayEstPrice);
-								String npvValStr = Formater.toCurrency(npvValue);
-								String[] firstLine = new String[npvCalTitle.length];
-								for (int index=0;index<npvCalTitle.length;index++) {
-									if (index==0) firstLine[index]="Portfolio";
-									else if (index==zEstColIndex) firstLine[index]=zEsStr;
-									else if (index==todayEstColIndex) firstLine[index]=tEsStr;
-									else if (index==npvValueColIndex) firstLine[index]=npvValStr;
-									else firstLine[index]="";
-								}
-								tItem.setText(firstLine);
-							}
-						}
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-				}
-				
-				@Override
-				public void mouseDown(MouseEvent arg0) {
-					System.out.println("Down");
-//					try {
-//						//get items from table
-//						TableItem[] tItems = portfolioTable.getItems();
-//						
-//						ContentController cc = new ContentController();
-//						int[] displayOptions = {ContentController.DISPLAY_UPDATE, ContentController.DISPLAY_NPV_TABLE};
-//						ArrayList<String[]> tableContents = cc.getTableContent(displayOptions, arcPortfolio);
-//						
-//						Comparator<String[]> contentComparator = new ContentComparator();			
-//						Collections.sort(tableContents, contentComparator);
-//						
-//						for (int i=0;i<tItems.length;i++) {
-//							tItems[i].dispose();
-//						}
-//						
-//						for (int i=0;i<=tableContents.size();i++) {
-//							if (i>0) {
-//								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-//								tItem.setText(tableContents.get(i-1));
-//							} else {
-//								TableItem tItem = new TableItem(portfolioTable, SWT.NONE);
-//								int zEstColIndex=0, todayEstColIndex=0, npvValueColIndex=0;
-//								for (int index=0;index<npvCalTitle.length;index++) {
-//									if (npvCalTitle[index].equalsIgnoreCase("Zillow Estimate")) zEstColIndex=index;
-//									if (npvCalTitle[index].equalsIgnoreCase("Today's Est. Price")) todayEstColIndex=index;
-//									if (npvCalTitle[index].equalsIgnoreCase("NPV Value")) npvValueColIndex=index;
-//								}
-//								Double zEstimate = 0.0, todayEstPrice = 0.0, npvValue=0.0;
-//								for (int ti=0;ti<tableContents.size();ti++) {
-//									String[] tRow = tableContents.get(ti);
-//									if (!tRow[zEstColIndex].equals("N/A")) 
-//										zEstimate += Double.valueOf(Formater.currencyToString(tRow[zEstColIndex]));
-//									if (!tRow[todayEstColIndex].equals("N/A")) 
-//										todayEstPrice += Double.valueOf(Formater.currencyToString(tRow[todayEstColIndex]));
-//									if (!tRow[npvValueColIndex].equals("N/A")) 
-//										npvValue += Double.valueOf(Formater.currencyToString(tRow[npvValueColIndex]));
-//								}
-//								String zEsStr = Formater.toCurrency(zEstimate);
-//								String tEsStr = Formater.toCurrency(todayEstPrice);
-//								String npvValStr = Formater.toCurrency(npvValue);
-//								String[] firstLine = new String[npvCalTitle.length];
-//								for (int index=0;index<npvCalTitle.length;index++) {
-//									if (index==0) firstLine[index]="Portfolio";
-//									else if (index==zEstColIndex) firstLine[index]=zEsStr;
-//									else if (index==todayEstColIndex) firstLine[index]=tEsStr;
-//									else if (index==npvValueColIndex) firstLine[index]=npvValStr;
-//									else firstLine[index]="";
-//								}
-//								tItem.setText(firstLine);
-//							}
-//						}
-//					} catch (Exception e1) {
-//						e1.printStackTrace();
-//					}
-					
-				}
-				
-				@Override
-				public void mouseDoubleClick(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-			});
-			//npvUpdateButton.addMouseListener(updateListener);
+			
+			npvUpdateButton.addMouseListener(updateListener);
 			npvUpdateButton.setText(updateString);
 			npvUpdateButton.setBounds(updateButtonX, updateButtonY, updateButtonWidth, updateButtonHeight);
 			
