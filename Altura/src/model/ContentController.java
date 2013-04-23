@@ -180,13 +180,13 @@ public class ContentController {
 							}
 							break;
 						}
-						case 10: { //NPV
+						case 11: { //NPV
 							NpvAnalyzer npvAnalyzer = new NpvAnalyzer();
 							ParamList tParams = MainWindow.paramList;
-							String irrStr = tParams.getParam(ViewConst.npvParamsNames[1]);
+							String waccStr = tParams.getParam(ViewConst.npvParamsNames[1]);
 							
-							String mIrrStr = tParams.getParam(ViewConst.npvParamsNames[2]);
-							Double mIrr = Double.valueOf(mIrrStr);
+							String mWaccStr = tParams.getParam(ViewConst.npvParamsNames[2]);
+							Double mWacc = Double.valueOf(mWaccStr);
 							
 							String mCostStr = tParams.getParam(ViewConst.npvParamsNames[3]);
 							Double mCost = Double.valueOf(mCostStr);
@@ -197,10 +197,14 @@ public class ContentController {
 							String taxStr = tParams.getParam(ViewConst.npvParamsNames[5]);
 							Double tax = Double.valueOf(taxStr);
 							
-							npvAnalyzer.setmIrrPercentage(mIrr);
+							String rentalGrowthStr = tParams.getParam(ViewConst.npvParamsNames[6]);
+							Double rentalGrowth = Double.valueOf(rentalGrowthStr);
+							
+							npvAnalyzer.setmWaccPercentage(mWacc);
 							npvAnalyzer.setMaintenanceCostPercentage(mCost);
 							npvAnalyzer.setTransactionCostPercentage(transCost);
 							npvAnalyzer.setTaxCostPercentage(tax);
+							npvAnalyzer.setRentalGrowthPercentage(rentalGrowth);
 							
 							String valueOption = tParams.getParam("Value Option");
 							String projectedTimeline = portfolioRow.get("Projected Timeline");
@@ -231,6 +235,9 @@ public class ContentController {
 								if (valueOption.equalsIgnoreCase("zillow")) {
 									String sellPriceStr = portfolioRow.get("Zestimate Px");
 									Double sellPrice = Double.valueOf(sellPriceStr);
+									//adjust sell price by Case-Shiller index increment
+									//3% per year
+									sellPrice = sellPrice * (1 + 0.03*(double)holdMonths/12.0);
 									try {
 										npvValue = npvAnalyzer.getSellNpv(rental, holdMonths, sellPrice);
 									} catch (Exception e) {
@@ -239,7 +246,8 @@ public class ContentController {
 									}
 								} else if (valueOption.equalsIgnoreCase("altura")) {
 									try {
-										npvValue = npvAnalyzer.getSellNpv(rental, holdMonths, todayPrice);
+										Double futurePrice = todayPrice * (1 + 0.03*(double)holdMonths/12.0);
+										npvValue = npvAnalyzer.getSellNpv(rental, holdMonths, futurePrice);
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -249,8 +257,17 @@ public class ContentController {
 							row.add(j, Formater.toCurrency(npvValue));
 							break;
 						}
-						
-						case 11: {
+						case 10: {
+							String zEstimateRentalStr = portfolioRow.get("Zestimate Rental");
+							Double zEstimateRental = Double.valueOf(zEstimateRentalStr);
+							if (zEstimateRentalStr == null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(zEstimateRental));
+							}
+							break;
+						}
+						case 12: {
 							String projTimeline = portfolioRow.get("Projected Timeline");
 							if (projTimeline==null) {
 								row.add(j,  "N/A");
@@ -259,61 +276,61 @@ public class ContentController {
 							}
 							break;
 						}
-						case 12: {  //Absorption rate
-							//Generate sql stmt
-							Calendar oneYearFromNow = now;
-							oneYearFromNow.add(Calendar.YEAR, -1);
-							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-							sdf.setCalendar(oneYearFromNow);
-							String nowStr = sdf.format(oneYearFromNow.getTime());
-							String sqlStmt = "";
-
-							int activeRecord=0, csRecord = 0;
-							if (type.equalsIgnoreCase("SFR")) {
-								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
-										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
-										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
-										"' and mlx_STATUS='CS' and " +
-										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
-								//System.out.println(sqlStmt);
-								db.query(sqlStmt);
-								csRecord = db.getCount();
-								
-								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
-										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
-										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
-										"' and mlx_STATUS='A'";
-								db.query(sqlStmt);
-								//System.out.println(sqlStmt);
-								activeRecord = db.getCount();
-								
-							} else if (type.equalsIgnoreCase("Condo")) {
-								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
-										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
-										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
-										"' and mlx_STATUS='CS' and " +
-										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
-								//System.out.println(sqlStmt);
-								db.query(sqlStmt);
-								csRecord = db.getCount();
-								
-								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
-										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
-										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
-										"' and mlx_STATUS='A'";
-								//System.out.println(sqlStmt);
-								db.query(sqlStmt);
-								activeRecord = db.getCount();
-							}
-							//System.out.println("active: " + activeRecord + " cs: " + csRecord);
-							 
-							if (csRecord==0) {
-								row.add(j, "Inf");
-							} else {
-								row.add(j,Formater.toShortDouble((double)activeRecord/csRecord, 1));
-							}
-							break;
-						}
+//						case 12: {  //Absorption rate
+//							//Generate sql stmt
+//							Calendar oneYearFromNow = now;
+//							oneYearFromNow.add(Calendar.YEAR, -1);
+//							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//							sdf.setCalendar(oneYearFromNow);
+//							String nowStr = sdf.format(oneYearFromNow.getTime());
+//							String sqlStmt = "";
+//
+//							int activeRecord=0, csRecord = 0;
+//							if (type.equalsIgnoreCase("SFR")) {
+//								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
+//										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+//										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+//										"' and mlx_STATUS='CS' and " +
+//										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
+//								//System.out.println(sqlStmt);
+//								db.query(sqlStmt);
+//								csRecord = db.getCount();
+//								
+//								sqlStmt = "select count(*) from MLX_SFR_data where mlx_ZIP='" + zipCode +
+//										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+//										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+//										"' and mlx_STATUS='A'";
+//								db.query(sqlStmt);
+//								//System.out.println(sqlStmt);
+//								activeRecord = db.getCount();
+//								
+//							} else if (type.equalsIgnoreCase("Condo")) {
+//								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
+//										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+//										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+//										"' and mlx_STATUS='CS' and " +
+//										" DATEDIFF(STR_TO_DATE(mlx_CD,'%m/%d/%Y'), str_to_date('" + nowStr + "','%Y-%m-%d'))>0" ;
+//								//System.out.println(sqlStmt);
+//								db.query(sqlStmt);
+//								csRecord = db.getCount();
+//								
+//								sqlStmt = "select count(*) from MLX_CONDO_data where mlx_ZIP='" + zipCode +
+//										"' and mlx_BEDSsharp='" + String.valueOf(numBedrms) +
+//										"' and mlx_FBsharp='" + String.valueOf((int)numBathrms) +
+//										"' and mlx_STATUS='A'";
+//								//System.out.println(sqlStmt);
+//								db.query(sqlStmt);
+//								activeRecord = db.getCount();
+//							}
+//							//System.out.println("active: " + activeRecord + " cs: " + csRecord);
+//							 
+//							if (csRecord==0) {
+//								row.add(j, "Inf");
+//							} else {
+//								row.add(j,Formater.toShortDouble((double)activeRecord/csRecord, 1));
+//							}
+//							break;
+//						}
 						default: {row.add(j, "");break;}
 						}
 					}
@@ -427,7 +444,17 @@ public class ContentController {
 							}
 							break;
 						}
-						case 11: {
+						case 10: {
+							String zEstimateRentalStr = portfolioRow.get("Zestimate Rental");
+							Double zEstimateRental = Double.valueOf(zEstimateRentalStr);
+							if (zEstimateRentalStr == null) {
+								row.add(j, "N/A");
+							} else {
+								row.add(j, Formater.toCurrency(zEstimateRental));
+							}
+							break;
+						}
+						case 12: {
 							String projTimeline = portfolioRow.get("Projected Timeline");
 							if (projTimeline==null) {
 								row.add(j,  "N/A");
@@ -470,9 +497,9 @@ public class ContentController {
 				Date date = new Date();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				contents.add(sdf.format(date));
-				//IRR
+				//WACC
 				contents.add("10.0");
-				//Monthly IRR
+				//Monthly WACC
 				contents.add(Formater.toShortDouble(10.0/12.0,2));
 				//Maintenance Costs
 				contents.add("7.0");
@@ -480,13 +507,15 @@ public class ContentController {
 				contents.add("8.0");
 				//Tax Costs
 				contents.add("30.0");
+				//Annual Rental Growth Rate
+				contents.add("4.0");
 				break;
 			}
 			case DISPLAY_NPV_STATS: {
 				//Data Timeframe
 				contents.add("12");
 				//Square Footage Constraints
-				contents.add("50");
+				contents.add("5");
 				break;
 			}
 			case DISPLAY_NPV_TABLE: {
@@ -495,11 +524,11 @@ public class ContentController {
 			}
 			case DISPLAY_SEN_PARAMS1: {
 				contents.add(null);
-				//IRR
+				//WACC
 				contents.add("10");
-				//Monthly IRR
-				double mIRR = Formater.annualToMonth(10.0);
-				contents.add(Formater.toShortDouble(mIRR,2));
+				//Monthly WACC
+				double mWacc = 10.0/12.0;
+				contents.add(Formater.toShortDouble(mWacc,2));
 				//Maintenance Cost annual
 				contents.add("8");
 				//Maintenance Costs

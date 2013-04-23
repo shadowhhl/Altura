@@ -1,29 +1,122 @@
 package view;
 
+import static view.ViewConst.comboWidthOffset;
+import static view.ViewConst.getNPVTableColNum;
+import static view.ViewConst.getNPVTableTitle;
+import static view.ViewConst.getNPVTableTitleWidth;
+import static view.ViewConst.getNPVTableTitleX;
+import static view.ViewConst.getNPVTableTitleY;
+import static view.ViewConst.getStatsTableTitleX;
+import static view.ViewConst.mainWindowHeight;
+import static view.ViewConst.mainWindowWidth;
+import static view.ViewConst.npvCalColumnWidth;
+import static view.ViewConst.npvCalHeight;
+import static view.ViewConst.npvCalTitle;
+import static view.ViewConst.npvCalWidth;
+import static view.ViewConst.npvGroupControlHeights;
+import static view.ViewConst.npvGroupControlNames;
+import static view.ViewConst.npvGroupControlWidth;
+import static view.ViewConst.npvGroupControlX;
+import static view.ViewConst.npvGroupControlYs;
+import static view.ViewConst.npvParamHeight;
+import static view.ViewConst.npvParamLabelWidth;
+import static view.ViewConst.npvParamTextWidth;
+import static view.ViewConst.npvParamsEditable;
+import static view.ViewConst.npvParamsNames;
+import static view.ViewConst.npvStatsHeight;
+import static view.ViewConst.npvStatsLabelWidth;
+import static view.ViewConst.npvStatsNames;
+import static view.ViewConst.npvStatsTextWidth;
+import static view.ViewConst.outputGroupControlHeights;
+import static view.ViewConst.outputGroupControlNames;
+import static view.ViewConst.outputGroupControlWidth;
+import static view.ViewConst.outputGroupControlX;
+import static view.ViewConst.outputGroupControlYs;
+import static view.ViewConst.outputNPVTableHeight;
+import static view.ViewConst.outputNPVTableTitleHeights;
+import static view.ViewConst.outputNPVTableTitleRowNum;
+import static view.ViewConst.outputNPVTableTitleWidths_0;
+import static view.ViewConst.outputNPVTableXOffset;
+import static view.ViewConst.outputStatsTableHeight;
+import static view.ViewConst.outputStatsTableTitleHeight;
+import static view.ViewConst.outputStatsTableTitles;
+import static view.ViewConst.outputStatsTableWidths;
+import static view.ViewConst.outputStatsTableXOffset;
+import static view.ViewConst.statsGroupControlHeights;
+import static view.ViewConst.statsGroupControlNames;
+import static view.ViewConst.statsGroupControlWidth;
+import static view.ViewConst.statsGroupControlX;
+import static view.ViewConst.statsGroupControlYs;
+import static view.ViewConst.statsNpvGroupControlHeights;
+import static view.ViewConst.statsNpvGroupControlWidths;
+import static view.ViewConst.statsNpvGroupControlXs;
+import static view.ViewConst.statsNpvGroupControlYs;
+import static view.ViewConst.statsNpvTableColumnWidth;
+import static view.ViewConst.statsNpvTableHeight;
+import static view.ViewConst.statsNpvTableNames;
+import static view.ViewConst.statsNpvTableWidth;
+import static view.ViewConst.statsParamHeight;
+import static view.ViewConst.statsParamLabelWidth;
+import static view.ViewConst.statsParamTextWidth;
+import static view.ViewConst.statsParamsEditable;
+import static view.ViewConst.statsParamsNames;
+import static view.ViewConst.tabFolderNames;
+import static view.ViewConst.updateButtonHeight;
+import static view.ViewConst.updateButtonWidth;
+import static view.ViewConst.updateButtonX;
+import static view.ViewConst.updateButtonY;
+import static view.ViewConst.updateString;
+import static view.ViewConst.userguideGroupControlHeights;
+import static view.ViewConst.userguideGroupControlNames;
+import static view.ViewConst.userguideGroupControlWidth;
+import static view.ViewConst.userguideGroupControlX;
+import static view.ViewConst.userguideGroupControlYs;
+import static view.ViewConst.userguideSessions;
+
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
-import static view.ViewConst.*;
-import model.*;
-import portfolio.*;
+import model.ContentController;
+import model.Formater;
+import model.ParamList;
 
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import JSci.maths.FourierMath;
+import portfolio.Portfolio;
 
 public class MainWindow {
 
@@ -113,9 +206,9 @@ public class MainWindow {
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		paramList.setParamValue(npvParamsNames[0], sdf.format(date));
-		//IRR (%)
+		//WACC (%)
 		paramList.setParamValue(npvParamsNames[1], String.valueOf(10.0));
-		//Monthly IRR (%)
+		//Monthly WACC (%)
 		paramList.setParamValue(npvParamsNames[2], String.valueOf(10.0/12.0));
 		//Maintenance Costs (%)
 		paramList.setParamValue(npvParamsNames[3], String.valueOf(7.0));
@@ -123,6 +216,8 @@ public class MainWindow {
 		paramList.setParamValue(npvParamsNames[4], String.valueOf(8.0));
 		//Tax Costs (%)
 		paramList.setParamValue(npvParamsNames[5], String.valueOf(30.0));
+		//Annual Rental Growth Rate (%)
+		paramList.setParamValue(npvParamsNames[6], String.valueOf(4.0));
 	}
 	
 	private void doCalculation() {
@@ -149,11 +244,21 @@ public class MainWindow {
 								  userguideGroupControlHeights[i]);
 				
 				Label lblNewLabel = new Label(grpText, SWT.NONE);
-				lblNewLabel.setBounds(5, 10, userguideGroupControlWidth, userguideGroupControlHeights[i]);
+				lblNewLabel.setBounds(5, 5, userguideGroupControlWidth, userguideGroupControlHeights[i]);
 				lblNewLabel.setText(userguideSessions[i]);
 				Display display = Display.getDefault();
 				Font lblFont = new Font(display, "Lucida", 12, java.awt.Font.PLAIN);
 				lblNewLabel.setFont(lblFont);
+				
+				if (i==userguideGroupControlNames.length-1) {
+					Composite imgComposite = new Composite(grpText, SWT.NONE);
+					Display imgDisplay = Display.getDefault();
+					ImageData fcImageData = new ImageData("FlowChartForUser.jpg");
+					fcImageData = fcImageData.scaledTo(850, 510);
+					Image flowChartImage = new Image(imgDisplay, fcImageData);
+					imgComposite.setBounds(40, 0, fcImageData.width, fcImageData.height);
+					imgComposite.setBackgroundImage(flowChartImage);
+				}
 			}
 			break;
 		}
@@ -390,20 +495,20 @@ public class MainWindow {
 						try {
 							String key = (String)text.getData("id");
 							paramList.setParamValue(key, text.getText());
-							if (key.equals("IRR (%)")) {
-								String irrStr = text.getText();
-								Double irr = Double.valueOf(irrStr);
-								Double monthIrr = 100.0*(Math.pow(1+irr/100.0, 1.0/12.0)-1.0);
-								paramList.setParamValue("Monthly IRR (%)", monthIrr.toString());
+							if (key.equals("WACC (%)")) {
+								String waccStr = text.getText();
+								Double wacc = Double.valueOf(waccStr);
+								Double monthWacc = 100.0*(Math.pow(1+wacc/100.0, 1.0/12.0)-1.0);
+								paramList.setParamValue("Monthly WACC (%)", monthWacc.toString());
 								
 								Control[] controls = text.getParent().getChildren();
 								for (int i=0;i<controls.length;i++) {
 									String names = (String)controls[i].getData("id");
 									if (names!=null) {
-										if (names.equals("Monthly IRR (%)")) {
+										if (names.equals("Monthly WACC (%)")) {
 											Text tmpText = (Text)controls[i];
 											
-											tmpText.setText(Formater.toShortDouble(monthIrr.doubleValue(), 2));
+											tmpText.setText(Formater.toShortDouble(monthWacc.doubleValue(), 2));
 										}
 									}
 								}

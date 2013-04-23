@@ -31,7 +31,7 @@ public class Portfolio {
 	}
 	
 	public void updatePortfolioRentalOverPeriod(HashMap<String, Double> rentalZEstimates,
-												double monthIRR, 
+												double monthWacc, 
 												HashMap<String, Calendar> projectedTimelines, 
 												Calendar todayDate) {
 		for (int i=0;i<portfolio.size();i++) {
@@ -44,7 +44,7 @@ public class Portfolio {
 			double monthDiff = millisDiff/1000.0/3600.0/24.0/30.0;
 			Double rentalOverPeriod; 
 			if (millisDiff > 0)
-				rentalOverPeriod = rentalEstimate/(monthIRR/100.0)*(1-1/(Math.pow((1+(monthIRR/100.0)),monthDiff)));
+				rentalOverPeriod = rentalEstimate/(monthWacc/100.0)*(1-1/(Math.pow((1+(monthWacc/100.0)),monthDiff)));
 			else
 				rentalOverPeriod = 0.0;
 			
@@ -54,7 +54,7 @@ public class Portfolio {
 	
 	public void updatePortfolioMaintenanceCostOverPeriod(HashMap<String, Double> values,
 														 double maintenanceCost,
-														 double monthIRR,
+														 double monthWacc,
 														 HashMap<String, Calendar> projectedTimelines,
 														 Calendar todayDate) {
 		for (int i=0;i<portfolio.size();i++) {
@@ -67,7 +67,7 @@ public class Portfolio {
 			double monthDiff = millisDiff/1000.0/3600.0/24.0/30.0;
 			Double maintenanceCostOverPeriod; 
 			if (millisDiff > 0)
-				maintenanceCostOverPeriod = maintenanceCost/100.0/12.0*value/(monthIRR/100.0)*(1-1/(Math.pow((1+(monthIRR/100.0)),monthDiff)));
+				maintenanceCostOverPeriod = maintenanceCost/100.0/12.0*value/(monthWacc/100.0)*(1-1/(Math.pow((1+(monthWacc/100.0)),monthDiff)));
 			else
 				maintenanceCostOverPeriod = 0.0;
 			
@@ -77,7 +77,7 @@ public class Portfolio {
 	
 	public void updatePortfolioRentAndSell(HashMap<String, Double> values,
 										   double maintenanceCost,
-										   double monthIRR,
+										   double monthWacc,
 										   double transactionCost,
 										   HashMap<String, Calendar> projectedTimelines,
 										   HashMap<String, Double> projectedPrices,
@@ -92,8 +92,8 @@ public class Portfolio {
 			Double rentalOverPeriod = Double.valueOf(portfolio.get(i).get("Rental Over Period"));
 			Double maintenanceOverPeriod = Double.valueOf(portfolio.get(i).get("Maintenance Over Period"));
 			Double ARCPrice, AlturaPrice;
-			ARCPrice = getProperyRentAndSell(value, monthIRR, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
-			AlturaPrice = getProperyRentAndSell(projectedPrice, monthIRR, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
+			ARCPrice = getProperyRentAndSell(value, monthWacc, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
+			AlturaPrice = getProperyRentAndSell(projectedPrice, monthWacc, transactionCost, pTimeline, rentalOverPeriod, maintenanceOverPeriod);
 			
 			portfolio.get(i).put("Rent and Sell later_ARC", ARCPrice.toString());
 			portfolio.get(i).put("Rent and Sell later_Altura", AlturaPrice.toString());
@@ -120,7 +120,7 @@ public class Portfolio {
 
 	public void updatePortfolioHoldAndSell(HashMap<String, Double> values,
 			   							   HashMap<String, Double> projectedPrices,
-			   							   double monthIRR,
+			   							   double monthWacc,
 			   							   HashMap<String, Calendar> projectedTimelines,
 										   double transactionCost,
 										   Calendar todayDate
@@ -138,8 +138,8 @@ public class Portfolio {
 			Double maintenanceOverPeriod = Double.valueOf(portfolio.get(i).get("Maintenance Over Period"));
 			Double ARCPrice, AlturaPrice;
 			if (millisDiff > 0) {
-				ARCPrice = (value*(1-transactionCost/100.0))/(Math.pow(1+monthIRR/100, monthDiff))-maintenanceOverPeriod;
-				AlturaPrice = (projectedPrice*(1-transactionCost/100.0))/(Math.pow(1+monthIRR/100, monthDiff))-maintenanceOverPeriod;
+				ARCPrice = (value*(1-transactionCost/100.0))/(Math.pow(1+monthWacc/100, monthDiff))-maintenanceOverPeriod;
+				AlturaPrice = (projectedPrice*(1-transactionCost/100.0))/(Math.pow(1+monthWacc/100, monthDiff))-maintenanceOverPeriod;
 			}
 			else {
 				ARCPrice = 0.0;
@@ -152,7 +152,7 @@ public class Portfolio {
 	}
 
 	public Double getProperyRentAndSell(double value,
-										double monthIRR,
+										double monthWacc,
 										double transactionCost,
 										Calendar projectedTimeline,
 										double rentalOverPeriod,
@@ -163,7 +163,7 @@ public class Portfolio {
 		long millisDiff = projectedTimeline.getTimeInMillis() - now.getTimeInMillis();
 		double monthDiff = millisDiff/1000.0/3600.0/24.0/30.0;
 		if (millisDiff > 0) {
-			rentAndSellValues = rentalOverPeriod-maintenanceOverPeriod+(value*(1-transactionCost/100.0))/(Math.pow(1+monthIRR/100, monthDiff));
+			rentAndSellValues = rentalOverPeriod-maintenanceOverPeriod+(value*(1-transactionCost/100.0))/(Math.pow(1+monthWacc/100, monthDiff));
 		}
 		else {
 			rentAndSellValues = 0.0;

@@ -2,7 +2,7 @@ package view;
 
 public class ViewConst {
 	public static final int mainWindowWidth = 1000;
-	public static final int mainWindowHeight = 700;
+	public static final int mainWindowHeight = 750;
 	public static final String[] tabFolderNames = {"User Guide", "Output(1)", "Output(2)", "Portfolio NPV", "Sensitivity", "Statistical Model", "Dynamic Pricing"};
 	
 	public static final int comboWidthOffset = 22;
@@ -15,25 +15,30 @@ public class ViewConst {
 	
 	//User Guide page
 	public static final int userguideGroupControlWidth = 940;
-	public static final int[] userguideGroupControlHeights = {120, 190, 130};
+	public static final int[] userguideGroupControlHeights = {60, 80, 530};
 	public static final int userguideGroupControlX = 20;
-	public static final int[] userguideGroupControlYs = {10, 150, 360};
+	public static final int[] userguideGroupControlYs = {10, 75, 160};
 	
 
-	public static final String[] userguideGroupControlNames = {"General Information", "Methodology", "Input and Output"};
+	public static final String[] userguideGroupControlNames = {"General Information", "Require Input and Assumptions", "Information Flow"};
 	public static final String[] userguideSessions = {
 		//The first session
-		"*This tool enables users to estimate the market value of perperties in the ARC's portfolio via a regression model.\n",
+		"*This tool is designed to dynamically valuate assets in a portfolio of real estate properties with objective " +
+		"of making decisions \nthat maximize the return of overall portfolio.\n",
 			
 		//The second session
-			"*Historical transaction records are downloaded from MLS and cleaned, then imported to a MySQL database.\n" +
-		"*Records of ARC's portfolio are cleaned and kept in a CSV file.\n" +
-		"*The \"Portfolio value\" tab shows the estimates of properties in ARC's portfolio. Only properties with completed information are included.\n" +
-		"*For each property, the estimate from Zillow, i.e. the ZEstimate, the estimate from our model, and the difference between these two estimates are shown.\n",
+//			"*Historical transaction records are downloaded from MLS and cleaned, then imported to a MySQL database.\n" +
+//		"*Records of ARC's portfolio are cleaned and kept in a CSV file.\n" +
+//		"*The \"Portfolio value\" tab shows the estimates of properties in ARC's portfolio. Only properties with completed information are included.\n" +
+//		"*For each property, the estimate from Zillow, i.e. the ZEstimate, the estimate from our model, and the difference between these two estimates are shown.\n",
 		//The third session
+		"",
 		"*A log-linear regression model is applied to estimate the market value of each property.\n" +
-		"*In the regression model, the dependent variables is the \"total price\", and independent variables include \"number of bedrooms\",\n\"number of bathrooms\", \"size of the property\", \"zip code\" (as dummy variables), and \"Case Shiller Index\"\n"
-		};
+		"*In the regression model, the dependent variables is the \"total price\", and independent variables include \"number of bedrooms\",\n\"number of bathrooms\", \"size of the property\", \"zip code\" (as dummy variables), and \"Case Shiller Index\"\n", 
+		
+		//The forth session
+		""
+	};
 
 	//Output(1) & (2) pages
 	public static final String[] outputGroupControlNames = {"Portfolio NPV Valuation", "Statistical Model", "Evolution of the Three Scenarios in the Future"};
@@ -128,14 +133,14 @@ public class ViewConst {
 	
 	//Portfolio NPV page
 	public static final String[] npvGroupControlNames = {"Parameters", "Statistical Market Analysis", "Market Value Estimates"};
-	public static final int[] npvGroupControlHeights = {180,90,250};
+	public static final int[] npvGroupControlHeights = {205,85,250};
 	public static final int npvGroupControlWidth = 940;
 	public static final int npvGroupControlX = 20;
-	public static final int[] npvGroupControlYs = {10, 210, 325};
+	public static final int[] npvGroupControlYs = {10, 235, 345};
 	
-	public static final String[] npvParamsNames = {"Today's date", "IRR (%)", "Monthly IRR (%)", "Maintenance Costs (%)", "Transaction Costs (%)", "Tax (%)"};
+	public static final String[] npvParamsNames = {"Today's date", "WACC (%)", "Monthly WACC (%)", "Maintenance Costs (%)", "Transaction Costs (%)", "Tax (%)", "Annual Rental Growth Rate (%)"};
 	//public static final String[] npvParamsNames = {"Today's date"};
-	public static final boolean[] npvParamsEditable = {false, true, false, true, true, true};
+	public static final boolean[] npvParamsEditable = {false, true, false, true, true, true, true};
 	public static final int npvParamLabelWidth = 200;
 	public static final int npvParamTextWidth = 100;
 	public static final int npvParamHeight = 20;
@@ -148,7 +153,7 @@ public class ViewConst {
 	public static final String[] npvCalTitle = {"Loan Account", "Zip Code", 
 												"Street", "Type", "Square Footage", "# of Bedrooms", "# of Bathrooms",
 												"Zillow Estimate", "Today's Est. Price", "Difference in Value", 
-												"NPV Value", "Projected Timeline", "Absorption Rate"};
+												"Zillow Rental Estimate", "NPV Value", "Projected Timeline"};
 	public static final int npvCalWidth = 910;
 	public static final int npvCalHeight = 210;
 	public static final int npvCalColumnWidth = 80;
@@ -160,7 +165,7 @@ public class ViewConst {
 	public static final int senGroupControlX = 20;
 	public static final int[] senGroupControlYs = {10, 270};
 	
-	public static final String[] senParamsNames0 = {"Loan Selection", "IRR (%)", "Monthly IRR (%)", "Maintenance costs (%)", 
+	public static final String[] senParamsNames0 = {"Loan Selection", "WACC (%)", "Monthly WACC (%)", "Maintenance costs (%)", 
 												  "Monthly Maintenance costs (%)", "Transaction costs (%)", "Inflation rate (%)", "Rental Income",
 												  "Projected timeline"};
 	public static final boolean[] senParamsEditable0 = {false, true, false, true, false, true, true, false, false};
